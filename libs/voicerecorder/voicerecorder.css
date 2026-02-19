@@ -1,0 +1,63 @@
+red {
+	color: red;
+}
+
+#voicecontrols {
+  display: flex;
+  margin-top: 2rem;
+  max-width: 28em;
+} 
+
+.vrecordButton {
+  flex-grow: 1;
+  height: 3rem;
+  border: none;
+  border-radius: 0.15rem;
+  background: #ed341d;
+  margin-left: 2px;
+  box-shadow: inset 0 -0.15rem 0 rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color:#ffffff;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.vrecordButton:hover, .vrecordButton:focus {
+  outline: none;
+  background: #c72d1c;
+}
+
+.vrecordButton::-moz-focus-inner {
+  border: 0;
+}
+
+.vrecordButton:active {
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.2);
+  line-height: 3rem;
+}
+
+.vrecordButton:disabled {
+  pointer-events: none;
+  background: lightgray;
+}
+.vrecordButton:first-child {
+  margin-left: 0;
+}
+
+audio {
+  display: block;
+  width: 100%;
+  margin-top: 0.2rem;
+}
+
+#voiceformats {
+  margin-top: 0.5rem;
+  font-size: 80%;
+}
+
+#voicerecordingsList{
+	max-width: 28em;
+}

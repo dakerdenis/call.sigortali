@@ -1,0 +1,32 @@
+.full-width{
+    width: 100% !important;
+}
+
+.exlike {display: block !important; border: none; height: 40px; margin: 0 !important; width: 100% !important; border-radius: 0 !important; line-height: 1 !important;}
+
+.select2-container{
+    width: 100% !important;
+    z-index: 9999;
+}
+
+.modal-lg, .modal-xl{
+    --bs-modal-width: 80% !important;
+}
+.pointer{
+    cursor: pointer !important;
+}
+
+@media print {
+  /* All your print styles go here */
+  .app-header,
+  .app-sidebar{
+    display: none !important;
+    font-size: 8px !important;
+  }
+  td{
+      padding: 0px !important;
+  }
+  .noprint{
+      display:none !important;
+  }
+}

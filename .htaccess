@@ -1,0 +1,21 @@
+Options +FollowSymLinks -MultiViews
+RewriteEngine On
+RewriteBase /
+
+RewriteRule ^orderitems\/(.*)$ index.php?action=orderitems&id=$1 [L]
+RewriteRule ^addorder\/(.*)$ index.php?action=addorder&id=$1 [L]
+RewriteRule ^ordersconfirmed index.php?action=ordersconfirmed
+RewriteRule ^orders index.php?action=orders
+RewriteRule ^statuses index.php?action=statuses
+RewriteRule ^current index.php?action=current
+RewriteRule ^accounting index.php?action=accounting
+RewriteRule ^events index.php?action=events
+RewriteRule ^finance index.php?action=finance
+RewriteRule ^customers index.php?action=customers
+RewriteRule ^companies index.php?action=companies
+RewriteRule ^settings index.php?action=settings
+
+RewriteRule ^call/(.*)$ /index.php?action=home&customer=$1 [L]
+
+ErrorDocument 404 /
+AddDefaultCharset UTF-8
