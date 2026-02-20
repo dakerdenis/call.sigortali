@@ -1,70 +1,47 @@
 <?php
-
 error_reporting(E_ALL);
 ini_set("display_errors", 0);
-
-if(isset($_SESSION['login']) && isset($_SESSION['id'])){
-
-    if ($_GET['type'] == 1){ // inline update
-
-        $rejectIt = array("id","itemId","deletedby");
+if (isset($_SESSION['login']) && isset($_SESSION['id'])) {
+    if ($_GET['type'] == 1) { // inline update
+        $rejectIt = array("id", "itemId", "deletedby");
         $itemId = htmlspecialchars(trim($_POST['itemId']));
         $module_name = $_GET['module_name'];
-
         foreach ($_POST as $key => $value) {
-
             if (DateTime::createFromFormat('d.m.Y', $value) !== false) {
                 $value = date("Y-m-d", strtotime($value));
             }
-            
-            if($key == 'password'){
-                
+            if ($key == 'password') {
                 $value = password_hash($value, PASSWORD_BCRYPT);
-                
             }
-
-            if(!in_array($key, $rejectIt) && $value != ''){
-
+            if (!in_array($key, $rejectIt) && $value != '') {
                 $sql = " UPDATE $module_name SET $key = '$value' WHERE id = '$itemId' ";
-                if(!mysqli_query($db, $sql)){
+                if (!mysqli_query($db, $sql)) {
                     echo mysqli_error($db);
                 } else {
                     $response = 1;
                 }
-
             }
-
         }
-
         echo $response;
-        
-    } else if ($_GET['type'] == 2){ // inline delete
-
+    } else if ($_GET['type'] == 2) { // inline delete
         $itemId = htmlspecialchars(trim($_POST['itemId']));
         $module_name = $_POST['module_name'];
-
-        if($module_name == 'orders'){
-        
-        $sql = " UPDATE payments SET teslimId = '0' WHERE teslimId = '$itemId' ";
-        if(!mysqli_query($db, $sql)){
-            echo mysqli_error($db);
-        } else {
-            //$response = 1;
+        if ($module_name == 'orders') {
+            $sql = " UPDATE payments SET teslimId = '0' WHERE teslimId = '$itemId' ";
+            if (!mysqli_query($db, $sql)) {
+                echo mysqli_error($db);
+            } else {
+                //$response = 1;
+            }
         }
-        
-        }
-
         $sql = " UPDATE $module_name SET deletedby = '$user_id' WHERE id = '$itemId' ";
-        if(!mysqli_query($db, $sql)){
+        if (!mysqli_query($db, $sql)) {
             echo mysqli_error($db);
         } else {
             $response = 1;
         }
-
         echo $response;
-        
-    } else if ($_GET['type'] == 3){ // customer add
-
+    } else if ($_GET['type'] == 3) { // customer add
         $identification = htmlspecialchars(trim($_POST['identification']));
         $company = htmlspecialchars(trim($_POST['company']));
         $end_date = htmlspecialchars(trim($_POST['end_date']));
@@ -84,37 +61,25 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
         $valuesp = htmlspecialchars(trim($_POST['valuesp']));
         $note = htmlspecialchars(trim($_POST['note']));
         $createdOperator = htmlspecialchars(trim($_POST['createdOperator']));
-
-        $sql = 'INSERT INTO customers ( identification, company, end_date, pin, pin_serial, serial, name, car_id, car_pin, make, model, type, engineType, premium, bm, phone, valuesp, note, createdby ) VALUES ( "'.$identification.'", "'.$company.'", "'.$end_date.'", "'.$pin.'", "'.$pin_serial.'", "'.$serial.'", "'.$name.'", "'.$car_id.'", "'.$car_pin.'", "'.$make.'", "'.$model.'", "'.$type.'", "'.$engineType.'", "'.$premium.'", "'.$bm.'", "'.$phone.'", "'.$valuesp.'", "'.$note.'", "'.$createdOperator.'" )';
+        $sql = 'INSERT INTO customers ( identification, company, end_date, pin, pin_serial, serial, name, car_id, car_pin, make, model, type, engineType, premium, bm, phone, valuesp, note, createdby ) VALUES ( "' . $identification . '", "' . $company . '", "' . $end_date . '", "' . $pin . '", "' . $pin_serial . '", "' . $serial . '", "' . $name . '", "' . $car_id . '", "' . $car_pin . '", "' . $make . '", "' . $model . '", "' . $type . '", "' . $engineType . '", "' . $premium . '", "' . $bm . '", "' . $phone . '", "' . $valuesp . '", "' . $note . '", "' . $createdOperator . '" )';
         $query = mysqli_query($db, $sql);
-        if($query){
-
+        if ($query) {
             $itemId = mysqli_insert_id($db);
-
             echo $car_id;
-
         } else {
             echo "Error";
         }
-
-    } else if ($_GET['type'] == 4){ // chat add
-
+    } else if ($_GET['type'] == 4) { // chat add
         $messageInput = htmlspecialchars(trim($_POST['messageInput']));
-
-        $sql = 'INSERT INTO chat ( message, createdby ) VALUES ( "'.$messageInput.'", "'.$user_id.'" )';
+        $sql = 'INSERT INTO chat ( message, createdby ) VALUES ( "' . $messageInput . '", "' . $user_id . '" )';
         $query = mysqli_query($db, $sql);
-        if($query){
-
+        if ($query) {
             echo 1;
-
         } else {
             echo "Error";
         }
-
-    } else if ($_POST['type'] == 5){ // callcenter status add
-
+    } else if ($_POST['type'] == 5) { // callcenter status add
         $orderDate = date("Y-m-d");
-
         $status_type = htmlspecialchars(trim($_POST['status_type']));
         $car_id = htmlspecialchars(trim($_POST['car_id']));
         $note = htmlspecialchars(trim($_POST['note']));
@@ -132,48 +97,33 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
         $fast = htmlspecialchars(trim($_POST['fast']));
         $disableEarn = htmlspecialchars(trim($_POST['disableEarn']));
         $disableEarnAll = htmlspecialchars(trim($_POST['disableEarnAll']));
-
         $getDefaultPrice = mysqli_fetch_array(mysqli_query($db, "SELECT id, valuesp, note, premium, createdby FROM customers WHERE car_id = '$car_id' ORDER by id DESC LIMIT 1"));
         $premiumPrice = $getDefaultPrice['premium'];
-
         $sql = 'INSERT INTO call_status ( type, car_id, content, next_date, companyId, productId, agreePrice, price, bonus, paycode, fast, forwardTo, disableEarn, disableEarnAll, status, createdby ) VALUES ( "' . $status_type . '", "' . $car_id . '", "' . $note . '", "' . $next_date . '", "' . $selectCompany . '", "' . $selectProduct . '", "' . $agreePrice . '", "' . $premiumPrice . '", "' . $bonus . '", "' . $paycode . '", "' . $fast . '", "' . $forwardTo . '", "' . $disableEarn . '", "' . $disableEarnAll . '", 1, "' . $user_id . '" )';
         $query = mysqli_query($db, $sql);
         if ($query) {
             //echo "(events) OK! <br>";
-
             $statusId = mysqli_insert_id($db);
-
             $getSuccessStatus = mysqli_fetch_array(mysqli_query($db, "SELECT id FROM paramitems WHERE code = 'success'"));
-
-            if($status_type == $getSuccessStatus['id']){
-
+            if ($status_type == $getSuccessStatus['id']) {
                 $getSaller = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM call_status WHERE YEAR(created) = YEAR(CURDATE()) AND car_id = '$car_id' AND type IN (SELECT id FROM paramitems WHERE code = 'confirm' AND status = 1 AND deletedby = 0) ORDER by id DESC"));
                 $saller = $getSaller['createdby'];
                 $selectedCompany = $getSaller['companyId'];
                 $selectedProduct = $getSaller['productId'];
                 $agreePrice = $getSaller['agreePrice'];
-
-                if(empty($getSaller['id'])){
-
+                if (empty($getSaller['id'])) {
                     $getSaller = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM call_status WHERE car_id = '$car_id' AND type IN (SELECT id FROM paramitems WHERE code = 'payed' AND status = 1 AND deletedby = 0) ORDER by id DESC"));
                     //$saller = $getSaller['createdby'];
                     $selectedCompany = $getSaller['companyId'];
                     $selectedProduct = $getSaller['productId'];
                     $agreePrice = $getSaller['agreePrice'];
-
                 }
-
                 $getPayWaitStatus = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM call_status WHERE car_id = '$car_id' AND type IN (SELECT id FROM paramitems WHERE code = 'paywait' AND status = 1 AND deletedby = 0) ORDER by id DESC"));
                 $price = $getPayWaitStatus['price'];
-
-                if(empty($getPayWaitStatus['id'])){
-
+                if (empty($getPayWaitStatus['id'])) {
                     $price = $getSaller['agreePrice'];
-
                 }
-
-                if($disableEarn == 0){
-                        
+                if ($disableEarn == 0) {
                     // $getCurrentSetting = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM settings WHERE id = 43"));
                     // $adetails = json_decode($getCurrentSetting['adetails'], true);
                     // foreach ($adetails as $obj) {
@@ -181,14 +131,11 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
                     //     if($saller == $obj['one'] && $selectedCompany == $obj['two'] && $price >= $obj['three'] && $price <= $obj['four']){
                     //         $bonus = $obj['five'];
                     //     }
-                
+
                     // }
                     // $userEarn = $agreePrice * $bonus / 100;
-
                 }
-
-                if($disableEarnAll == 0){
-                
+                if ($disableEarnAll == 0) {
                     // $getCurrentSetting = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM settings WHERE id = 43"));
                     // $details = json_decode($getCurrentSetting['details'], true);
                     // foreach ($details as $obj) {
@@ -196,99 +143,82 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
                     //     if($selectedCompany == $obj['one'] && $price >= $obj['two'] && $price <= $obj['three']){
                     //         $bonus = $obj['four'];
                     //     }
-                
+
                     // }
                     // $companyEarn = $price * $bonus / 100;
-
                 }
-                
                 $totalEarn = $companyEarn - $userEarn;
-
-                
                 $customerId = $getDefaultPrice['id'];
                 $defaultPrice = $getDefaultPrice['valuesp'];
                 $carContent = $getDefaultPrice['note'];
-
-                if(!empty($_POST['changeUser'])){
+                if (!empty($_POST['changeUser'])) {
                     $saller = $_POST['changeUser'];
-                } else{
-                    
-                    if(empty($saller)){
+                } else {
+                    if (empty($saller)) {
                         $saller = $getDefaultPrice['createdby'];
                     }
-                    
-                    
                 }
-
                 mysqli_query($db, "UPDATE call_status SET identification = '$identification' , companyId = '$selectedCompany' , productId = '$selectedProduct' , agreeUser = '$saller' , agreePrice = '$agreePrice' , defaultPrice = '$defaultPrice' , userEarn = '$userEarn' , companyEarn = '$companyEarn' , write_date = '$write_date' , content = '$carContent' WHERE id = '$statusId'");
-
                 mysqli_query($db, "UPDATE customers SET identification = '$identification' , company = '$selectedCompany' , end_date = '$end_date' , createdby = '$saller' WHERE car_id = '$car_id'");
                 mysqli_query($db, "UPDATE customers_temp SET identification = '$identification' , company = '$selectedCompany' , end_date = '$end_date' , createdby = '$saller' WHERE car_id = '$car_id'");
-
             }
 
             // add payment
-    
-                $paymentMethod = $_POST['paymentMethod'];
-        
-                foreach($paymentMethod as $key=>$payMethodId){
 
-                    $getPaymentAccount = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM finaccounts WHERE title = '$payMethodId'"));
+            $paymentMethod = $_POST['paymentMethod'];
 
-                    $allprice = $_POST['allprice'][$key];
+            foreach ($paymentMethod as $key => $payMethodId) {
 
-                    if($allprice > 0){
+                $getPaymentAccount = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM finaccounts WHERE title = '$payMethodId'"));
 
-                        $title = $note;
+                $allprice = $_POST['allprice'][$key];
 
-                        $finaccounts = $getPaymentAccount['title'];
-                        $fincategory = 'Sığorta ödənişləri';
-                        $amount = $allprice;
+                if ($allprice > 0) {
 
-                        $orderId = $identification;
+                    $title = $note;
 
-                        if($status_type == $getSuccessStatus['id']){
+                    $finaccounts = $getPaymentAccount['title'];
+                    $fincategory = 'Sığorta ödənişləri';
+                    $amount = $allprice;
 
-                            $to = $car_id;
-                            $from = $finaccounts;
+                    $orderId = $identification;
 
-                        } else{
+                    if ($status_type == $getSuccessStatus['id']) {
 
-                            $from = $car_id;
-                            $to = $finaccounts;
+                        $to = $car_id;
+                        $from = $finaccounts;
+                    } else {
 
-                        }
-
-                        $sql = 'INSERT INTO payments ( fromAccount, toAccount, orderId, title, amount, paydate, category, status, createdby ) VALUES ( "'.$from.'", "'.$to.'", "'.$orderId.'", "'.$title.'", "'.$amount.'", "'.$orderDate.'", "'.$fincategory.'", 1, "'.$user_id.'" )';
-                        $query = mysqli_query($db, $sql);
-                        if($query){
-
-                            $costId = mysqli_insert_id($db);
-                            //addlog($user_id, "35", $costId, "#".$costId." nömrəli xərc əlavə etdi.");
-
-                            //echo "1";
-                        } else {
-                            echo mysqli_error($db);
-                        }
-
+                        $from = $car_id;
+                        $to = $finaccounts;
                     }
 
+                    $sql = 'INSERT INTO payments ( fromAccount, toAccount, orderId, title, amount, paydate, category, status, createdby ) VALUES ( "' . $from . '", "' . $to . '", "' . $orderId . '", "' . $title . '", "' . $amount . '", "' . $orderDate . '", "' . $fincategory . '", 1, "' . $user_id . '" )';
+                    $query = mysqli_query($db, $sql);
+                    if ($query) {
+
+                        $costId = mysqli_insert_id($db);
+                        //addlog($user_id, "35", $costId, "#".$costId." nömrəli xərc əlavə etdi.");
+
+                        //echo "1";
+                    } else {
+                        echo mysqli_error($db);
+                    }
                 }
+            }
 
             // add payment
-            
+
             mysqli_query($db, "UPDATE users SET currentCustomer = '' WHERE id = '$user_id'");
 
 
             echo 1;
-
         } else {
 
             echo "(stock) Error: " . $sql . "<br>" . mysqli_error($db);
             //header('Location: /index.php?action=error');
         }
-
-    } else if ($_GET['type'] == 6){ // users add
+    } else if ($_GET['type'] == 6) { // users add
 
         $name = htmlspecialchars(trim($_POST['name']));
         $surname = htmlspecialchars(trim($_POST['surname']));
@@ -298,9 +228,9 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
 
         $newpass = password_hash($password, PASSWORD_BCRYPT);
 
-        $sql = 'INSERT INTO users ( name, surname, email, groupId, password, status, createdby ) VALUES ( "'.$name.'", "'.$surname.'", "'.$email.'", "'.$groupId.'", "'.$newpass.'", 1, "'.$user_id.'" )';
+        $sql = 'INSERT INTO users ( name, surname, email, groupId, password, status, createdby ) VALUES ( "' . $name . '", "' . $surname . '", "' . $email . '", "' . $groupId . '", "' . $newpass . '", 1, "' . $user_id . '" )';
         $query = mysqli_query($db, $sql);
-        if($query){
+        if ($query) {
 
             $itemId = mysqli_insert_id($db);
 
@@ -308,8 +238,7 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
         } else {
             echo "Error";
         }
-
-    } else if ($_GET['type'] == 8){ // payment add
+    } else if ($_GET['type'] == 8) { // payment add
 
         $category = htmlspecialchars(trim($_POST['category']));
         $from = htmlspecialchars(trim($_POST['from']));
@@ -321,16 +250,15 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
 
         $identification = htmlspecialchars(trim($_POST['identification']));
 
-        if(empty($identification)){
+        if (empty($identification)) {
 
             $getLastIdentification = mysqli_fetch_array(mysqli_query($db, "SELECT identification FROM call_status WHERE (car_id = '$from' OR car_id = '$to') AND identification != '' ORDER by id DESC LIMIT 1"));
             $identification = $getLastIdentification['identification'];
-
         }
 
-        $sql = 'INSERT INTO payments ( category, fromAccount, toAccount, orderId, amount, paydate, title, status, createdby ) VALUES ( "'.$category.'", "'.$from.'", "'.$to.'", "'.$identification.'", "'.$amount.'", "'.$paydate.'", "'.$note.'", 1, "'.$user_id.'" )';
+        $sql = 'INSERT INTO payments ( category, fromAccount, toAccount, orderId, amount, paydate, title, status, createdby ) VALUES ( "' . $category . '", "' . $from . '", "' . $to . '", "' . $identification . '", "' . $amount . '", "' . $paydate . '", "' . $note . '", 1, "' . $user_id . '" )';
         $query = mysqli_query($db, $sql);
-        if($query){
+        if ($query) {
 
             $itemId = mysqli_insert_id($db);
 
@@ -338,8 +266,7 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
         } else {
             echo mysqli_error($db);
         }
-
-    } else if ($_GET['type'] == 10){ // orders add
+    } else if ($_GET['type'] == 10) { // orders add
 
         $title = htmlspecialchars(trim($_POST['title']));
         $amount = htmlspecialchars(trim($_POST['amount']));
@@ -354,36 +281,34 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
         $totalAmount = 0;
         $totalCost = 0;
 
-        $sql = 'INSERT INTO orders ( title, accountId, toAccount, note, createdby ) VALUES ( "'.$title.'", "'.$from.'", "'.$to.'", "'.$note.'", "'.$user_id.'" )';
+        $sql = 'INSERT INTO orders ( title, accountId, toAccount, note, createdby ) VALUES ( "' . $title . '", "' . $from . '", "' . $to . '", "' . $note . '", "' . $user_id . '" )';
         $query = mysqli_query($db, $sql);
-        if($query){
+        if ($query) {
 
             $itemId = mysqli_insert_id($db);
 
-            foreach($car_ids as $car_id){
+            foreach ($car_ids as $car_id) {
                 mysqli_query($db, "UPDATE payments SET teslimId = '$itemId' WHERE id = '$car_id'");
 
                 $getPayment = mysqli_fetch_array(mysqli_query($db, "SELECT amount FROM payments WHERE id = '$car_id'"));
                 $totalAmount += $getPayment['amount'];
-
             }
 
-            foreach($cost_ids as $cost_id){
+            foreach ($cost_ids as $cost_id) {
                 mysqli_query($db, "UPDATE payments SET teslimId = '$itemId' WHERE id = '$cost_id'");
 
                 $getPayment = mysqli_fetch_array(mysqli_query($db, "SELECT amount FROM payments WHERE id = '$cost_id'"));
                 $totalCost += $getPayment['amount'];
-
             }
 
             $transfer = ($totalAmount - $totalCost);
 
-            $sql = 'INSERT INTO payments ( category, fromAccount, toAccount, orderId, amount, paydate, title, teslimId, status, createdby ) VALUES ( "Transfer", "'.$from.'", "'.$to.'", "'.$itemId.'", "'.$transfer.'", "'.$paydate.'", "'.$note.'", 3, 1, "'.$user_id.'" )';
+            $sql = 'INSERT INTO payments ( category, fromAccount, toAccount, orderId, amount, paydate, title, teslimId, status, createdby ) VALUES ( "Transfer", "' . $from . '", "' . $to . '", "' . $itemId . '", "' . $transfer . '", "' . $paydate . '", "' . $note . '", 3, 1, "' . $user_id . '" )';
             $query = mysqli_query($db, $sql);
-            if($query){
-    
+            if ($query) {
+
                 $itemId = mysqli_insert_id($db);
-    
+
                 echo "1";
             } else {
                 echo mysqli_error($db);
@@ -393,61 +318,51 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
         } else {
             echo mysqli_error($db);
         }
-
-    } else if ($_GET['type'] == 11){ // confirm
+    } else if ($_GET['type'] == 11) { // confirm
 
         $itemId = $_POST['itemId'];
         $module_name = $_POST['module_name'];
-        
-        $sql = " UPDATE ".$module_name." SET confirmed = '$user_id' WHERE id = '$itemId' ";
-            
-        if(!mysqli_query($db, $sql)){
+
+        $sql = " UPDATE " . $module_name . " SET confirmed = '$user_id' WHERE id = '$itemId' ";
+
+        if (!mysqli_query($db, $sql)) {
             echo "Error";
         } else {
 
             echo "1";
         }
-        
-    } else if ($_GET['type'] == 12){ // status
+    } else if ($_GET['type'] == 12) { // status
 
         $itemId = $_POST['itemId'];
         $status = $_POST['status'];
         $module_name = $_POST['module_name'];
-        
-        $sql = " UPDATE ".$module_name." SET status = '$status' WHERE id = '$itemId' ";
-            
-        if(!mysqli_query($db, $sql)){
+
+        $sql = " UPDATE " . $module_name . " SET status = '$status' WHERE id = '$itemId' ";
+
+        if (!mysqli_query($db, $sql)) {
             echo "Error";
         } else {
 
             echo "1";
         }
-        
-    } else if ($_GET['type'] == 13){ // transferdata
+    } else if ($_GET['type'] == 13) { // transferdata
 
         $from = $_POST['from'];
         $to = $_POST['to'];
-        
+
         $sqlRow = mysqli_query($db, "SELECT * FROM call_status WHERE createdby = '$from' AND type = '5'");
-        while($rowRow = mysqli_fetch_array($sqlRow)){
-            
+        while ($rowRow = mysqli_fetch_array($sqlRow)) {
+
             $itemId = $rowRow['id'];
-            
+
             $sql = " UPDATE call_status SET createdby = '$to' WHERE id = '$itemId' ";
-            
-            if(!mysqli_query($db, $sql)){
+
+            if (!mysqli_query($db, $sql)) {
                 echo "Error";
             } else {
-    
+
                 echo "1";
             }
-            
         }
-        
-        
-        
     }
-
 }
-
-?>

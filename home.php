@@ -1,101 +1,66 @@
 <?php include('inc/header.php'); ?>
-
 <?
-
 //error_reporting(E_ALL);
 //ini_set("display_errors", 1);
-
 ?>
-
 <style>
   a {
     text-decoration: none;
   }
 </style>
-
 <div class="projects-section">
-
   <div id="dynamic_content">
     <center>
       <div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status"><span class="sr-only"></span></div>
     </center>
   </div>
-
 </div>
-
-
-
 <div class="messages-section" style="overflow: hidden;">
-
   <div id="messages" class="messages" style="max-height: 550px; overflow-y: auto;">
-
     <? if ($userGroup == 1 || $userGroup == 3) { ?>
-
       <?
-
       $today = 0;
       $query = "SELECT * FROM call_status WHERE car_id IN (SELECT car_id FROM call_status WHERE createdby = '$user_id') AND type IN (SELECT id FROM paramitems WHERE code = 'paywait' AND status = 1 AND deletedby = 0) AND id IN (SELECT MAX(id) FROM call_status GROUP BY car_id) AND created > now() - INTERVAL 60 day ORDER by fast DESC";
       $sql = mysqli_query($db, $query);
       while ($row = mysqli_fetch_array($sql)) {
-
         $today++;
-
         $getParamitem = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM paramitems WHERE id = " . $row['type']));
         $getCustomer = mysqli_fetch_array(mysqli_query($db, "SELECT pin FROM customers WHERE id = '" . $row['car_id'] . "'"));
-
         if ($row['fast'] == 1) {
           $addClass = "alert-danger";
         } else {
           $addClass = "alert-success";
         }
-
         $getStatusDate = $row['created'];
         $thisTime = date("Y-m-d H:i:s");
-
         $hourdiff = round((strtotime($thisTime) - strtotime($getStatusDate)) / 3600, 1) . " S";
-
         if (is_numeric($getCustomer['pin'])) {
           $hourLimit = 360;
         } else {
           $hourLimit = 48;
         }
-
         if ((round((strtotime($thisTime) - strtotime($getStatusDate)) / 3600, 1)) > $hourLimit) {
           $addClass = "alert-danger";
         }
-
-        echo '
-
-                                                                <a href="/call/' . $row['car_id'] . '">
-                                                                    <div class="alert ' . $addClass . ' ' . $getParamitem['code'] . '" role="alert" ' . ((!empty($row['content']) || !empty($row['companyId']) || !empty($row['paycode']) || !empty($row['price']) || !empty($row['agreePrice']) || !empty($row['next_date'])) ? '  data-toggle="tooltip" data-original-title="' . (($row['next_date'] != '0000-00-00 00:00:00') ? ' Xatırlatma Tarixi: ' . $row['next_date'] . ' ' : "") . ' ' . ((!empty($row['content'])) ? ' Qeyd: ' . $row['content'] . ' ' : "") . ' ' . ((!empty($row['companyId'])) ? ' Şirkət: ' . $selectedCompany['title'] . ' ' : "") . ' ' . (($row['price'] != '0.00') ? ' Qiymət: ' . $row['price'] . ' ' : "") . ' ' . (($row['agreePrice'] != '0.00') ? ' Razılaşdığı Qiymət: ' . $row['agreePrice'] . ' ' : "") . ' ' . ((!empty($row['paycode'])) ? ' Ödəniş Kodu: ' . $row['paycode'] . ' ' : "") . ' Status Tarixi: ' . $row['created'] . '"' : "") . '>
-                                                                        <strong>' . $row['car_id'] . ': </strong>' . $getParamitem['title'] . ' ' . $hourdiff . '
-                                                                    </div>
-                                                                </a>
-
-                                                            ';
+        echo '<a href="/call/' . $row['car_id'] . '">
+             <div class="alert ' . $addClass . ' ' . $getParamitem['code'] . '" role="alert" ' . ((!empty($row['content']) || !empty($row['companyId']) || !empty($row['paycode']) || !empty($row['price']) || !empty($row['agreePrice']) || !empty($row['next_date'])) ? '  data-toggle="tooltip" data-original-title="' . (($row['next_date'] != '0000-00-00 00:00:00') ? ' Xatırlatma Tarixi: ' . $row['next_date'] . ' ' : "") . ' ' . ((!empty($row['content'])) ? ' Qeyd: ' . $row['content'] . ' ' : "") . ' ' . ((!empty($row['companyId'])) ? ' Şirkət: ' . $selectedCompany['title'] . ' ' : "") . ' ' . (($row['price'] != '0.00') ? ' Qiymət: ' . $row['price'] . ' ' : "") . ' ' . (($row['agreePrice'] != '0.00') ? ' Razılaşdığı Qiymət: ' . $row['agreePrice'] . ' ' : "") . ' ' . ((!empty($row['paycode'])) ? ' Ödəniş Kodu: ' . $row['paycode'] . ' ' : "") . ' Status Tarixi: ' . $row['created'] . '"' : "") . '>
+              <strong>' . $row['car_id'] . ': </strong>' . $getParamitem['title'] . ' ' . $hourdiff . '
+                  </div>
+    </a>';
       }
-
       if ($today == 0) {
         echo '<p>Məlumat tapılmadı.</p>';
       }
-
       ?>
-
       <?
-
       $today = 0;
       $query = "SELECT * FROM call_status WHERE car_id IN (SELECT car_id FROM call_status WHERE car_id IN (SELECT car_id FROM call_status WHERE createdby = '$user_id') AND type IN (SELECT id FROM paramitems WHERE code = 'backto' AND status = 1 AND deletedby = 0) AND id IN (SELECT MAX(id) FROM call_status GROUP BY car_id)) AND created > now() - INTERVAL 60 day GROUP by car_id ORDER by fast DESC";
       $sql = mysqli_query($db, $query);
       while ($row = mysqli_fetch_array($sql)) {
-
         //now
-
         $checkCustomer = mysqli_fetch_array(mysqli_query($db, "SELECT end_date FROM customers WHERE car_id = '" . $row['car_id'] . "'"));
-
         //if($checkCustomer['end_date'] > date("Y-m-d")){
-
         //now
-
         $checkForward = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM call_status WHERE car_id = '" . $row['car_id'] . "' AND forwardTo != '$user_id' AND forwardTo != 0 ORDER by id DESC LIMIT 1"));
         if (empty($checkForward['id'])) {
 
@@ -117,164 +82,109 @@
           } else {
             $addClass = "alert-success";
           }
-
           echo '
-
-                                                                    <a href="/call/' . $row['car_id'] . '">
-                                                                        <div class="alert ' . $addClass . ' ' . $getParamitem['code'] . ' ' . $addClass . '" role="alert" ' . ((!empty($row['content']) || !empty($row['companyId']) || !empty($row['paycode']) || !empty($row['price']) || !empty($row['agreePrice']) || !empty($row['next_date'])) ? '  data-toggle="tooltip" data-original-title="' . (($row['next_date'] != '0000-00-00 00:00:00') ? ' Xatırlatma Tarixi: ' . $row['next_date'] . ' ' : "") . ' ' . ((!empty($row['content'])) ? ' Qeyd: ' . $row['content'] . ' ' : "") . ' ' . ((!empty($row['companyId'])) ? ' Şirkət: ' . $selectedCompany['title'] . ' ' : "") . ' ' . (($row['price'] != '0.00') ? ' Qiymət: ' . $row['price'] . ' ' : "") . ' ' . (($row['agreePrice'] != '0.00') ? ' Razılaşdığı Qiymət: ' . $row['agreePrice'] . ' ' : "") . ' ' . ((!empty($row['paycode'])) ? ' Ödəniş Kodu: ' . $row['paycode'] . ' ' : "") . ' Status Tarixi: ' . $row['created'] . '"' : "") . '>
-                                                                            <strong>' . $row['car_id'] . ': </strong>' . $getParamitem['title'] . '
-                                                                        </div>
-                                                                    </a>
-
-                                                                ';
+        <a href="/call/' . $row['car_id'] . '">
+            <div class="alert ' . $addClass . ' ' . $getParamitem['code'] . ' ' . $addClass . '" role="alert" ' . ((!empty($row['content']) || !empty($row['companyId']) || !empty($row['paycode']) || !empty($row['price']) || !empty($row['agreePrice']) || !empty($row['next_date'])) ? '  data-toggle="tooltip" data-original-title="' . (($row['next_date'] != '0000-00-00 00:00:00') ? ' Xatırlatma Tarixi: ' . $row['next_date'] . ' ' : "") . ' ' . ((!empty($row['content'])) ? ' Qeyd: ' . $row['content'] . ' ' : "") . ' ' . ((!empty($row['companyId'])) ? ' Şirkət: ' . $selectedCompany['title'] . ' ' : "") . ' ' . (($row['price'] != '0.00') ? ' Qiymət: ' . $row['price'] . ' ' : "") . ' ' . (($row['agreePrice'] != '0.00') ? ' Razılaşdığı Qiymət: ' . $row['agreePrice'] . ' ' : "") . ' ' . ((!empty($row['paycode'])) ? ' Ödəniş Kodu: ' . $row['paycode'] . ' ' : "") . ' Status Tarixi: ' . $row['created'] . '"' : "") . '>
+                <strong>' . $row['car_id'] . ': </strong>' . $getParamitem['title'] . '
+            </div>
+        </a>';
         }
-
         // now
-
         //}
-
         // now
-
       }
-
       if ($today == 0) {
         echo '<p>Məlumat tapılmadı.</p>';
       } else {
         echo '<script>$(".badgeBackto").text("' . $today . '");</script>';
       }
-
       ?>
-
       <?
-
       $today = 0;
       $query = "SELECT * FROM call_status WHERE car_id IN (SELECT car_id FROM call_status WHERE forwardTo = '$user_id') AND type IN (SELECT id FROM paramitems WHERE code = 'forward' AND status = 1 AND deletedby = 0) AND id IN (SELECT MAX(id) FROM call_status GROUP BY car_id) AND created > now() - INTERVAL 60 day ORDER by fast DESC";
       $sql = mysqli_query($db, $query);
       while ($row = mysqli_fetch_array($sql)) {
-
         $today++;
-
         $getParamitem = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM paramitems WHERE id = " . $row['type']));
-
         if ($row['type'] == 14) {
-
           $getStatusDate = $row['created'];
           $thisTime = date("Y-m-d H:i:s");
-
           $hourdiff = round((strtotime($thisTime) - strtotime($getStatusDate)) / 3600, 1) . " S";
         }
-
         if ($row['fast'] == 1) {
           $addClass = "alert-danger";
         } else {
           $addClass = "alert-success";
         }
-
         echo '
-
-                                                                <a href="/call/' . $row['car_id'] . '">
-                                                                    <div class="alert ' . $addClass . ' ' . $getParamitem['code'] . ' ' . $addClass . '" role="alert" ' . ((!empty($row['content']) || !empty($row['companyId']) || !empty($row['paycode']) || !empty($row['price']) || !empty($row['agreePrice']) || !empty($row['next_date'])) ? '  data-toggle="tooltip" data-original-title="' . (($row['next_date'] != '0000-00-00 00:00:00') ? ' Xatırlatma Tarixi: ' . $row['next_date'] . ' ' : "") . ' ' . ((!empty($row['content'])) ? ' Qeyd: ' . $row['content'] . ' ' : "") . ' ' . ((!empty($row['companyId'])) ? ' Şirkət: ' . $selectedCompany['title'] . ' ' : "") . ' ' . (($row['price'] != '0.00') ? ' Qiymət: ' . $row['price'] . ' ' : "") . ' ' . (($row['agreePrice'] != '0.00') ? ' Razılaşdığı Qiymət: ' . $row['agreePrice'] . ' ' : "") . ' ' . ((!empty($row['paycode'])) ? ' Ödəniş Kodu: ' . $row['paycode'] . ' ' : "") . ' Status Tarixi: ' . $row['created'] . '"' : "") . '>
-                                                                        <strong>' . $row['car_id'] . ': </strong>' . $getParamitem['title'] . '
-                                                                    </div>
-                                                                </a>
-
-                                                            ';
+<a href="/call/' . $row['car_id'] . '">
+    <div class="alert ' . $addClass . ' ' . $getParamitem['code'] . ' ' . $addClass . '" role="alert" ' . ((!empty($row['content']) || !empty($row['companyId']) || !empty($row['paycode']) || !empty($row['price']) || !empty($row['agreePrice']) || !empty($row['next_date'])) ? '  data-toggle="tooltip" data-original-title="' . (($row['next_date'] != '0000-00-00 00:00:00') ? ' Xatırlatma Tarixi: ' . $row['next_date'] . ' ' : "") . ' ' . ((!empty($row['content'])) ? ' Qeyd: ' . $row['content'] . ' ' : "") . ' ' . ((!empty($row['companyId'])) ? ' Şirkət: ' . $selectedCompany['title'] . ' ' : "") . ' ' . (($row['price'] != '0.00') ? ' Qiymət: ' . $row['price'] . ' ' : "") . ' ' . (($row['agreePrice'] != '0.00') ? ' Razılaşdığı Qiymət: ' . $row['agreePrice'] . ' ' : "") . ' ' . ((!empty($row['paycode'])) ? ' Ödəniş Kodu: ' . $row['paycode'] . ' ' : "") . ' Status Tarixi: ' . $row['created'] . '"' : "") . '>
+        <strong>' . $row['car_id'] . ': </strong>' . $getParamitem['title'] . '
+    </div>
+</a>                                                            ';
       }
 
       if ($today == 0) {
         echo '<p>Məlumat tapılmadı.</p>';
       }
-
       ?>
-
-
       <?
-
       $today = 0;
       $query = "SELECT * FROM call_status WHERE car_id IN (SELECT car_id FROM customers WHERE DATE(end_date) >= CURDATE()) AND createdby = '$user_id' AND DATE(next_date) <= CURDATE() AND type IN (SELECT id FROM paramitems WHERE code = 'waiting' AND status = 1 AND deletedby = 0) AND id IN (SELECT MAX(id) FROM call_status GROUP BY car_id) AND created > now() - INTERVAL 60 day ORDER by fast DESC";
       $sql = mysqli_query($db, $query);
       while ($row = mysqli_fetch_array($sql)) {
-
         $today++;
-
         $getParamitem = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM paramitems WHERE id = " . $row['type']));
-
         if ($row['fast'] == 1) {
           $addClass = "alert-danger";
         } else {
           $addClass = "alert-success";
         }
-
         if ($today == 1) {
-
           echo '
-
-                                                                    <a href="/call/' . $row['car_id'] . '">
-                                                                        <div class="alert ' . $addClass . ' ' . $getParamitem['code'] . '" role="alert" ' . ((!empty($row['content']) || !empty($row['companyId']) || !empty($row['paycode']) || !empty($row['price']) || !empty($row['agreePrice']) || !empty($row['next_date'])) ? '  data-toggle="tooltip" data-original-title="' . (($row['next_date'] != '0000-00-00 00:00:00') ? ' Xatırlatma Tarixi: ' . $row['next_date'] . ' ' : "") . ' ' . ((!empty($row['content'])) ? ' Qeyd: ' . $row['content'] . ' ' : "") . ' ' . ((!empty($row['companyId'])) ? ' Şirkət: ' . $selectedCompany['title'] . ' ' : "") . ' ' . (($row['price'] != '0.00') ? ' Qiymət: ' . $row['price'] . ' ' : "") . ' ' . (($row['agreePrice'] != '0.00') ? ' Razılaşdığı Qiymət: ' . $row['agreePrice'] . ' ' : "") . ' ' . ((!empty($row['paycode'])) ? ' Ödəniş Kodu: ' . $row['paycode'] . ' ' : "") . ' Status Tarixi: ' . $row['created'] . '"' : "") . '>
-                                                                            <strong>' . $row['car_id'] . ': </strong>' . $getParamitem['title'] . '
-                                                                        </div>
-                                                                    </a>
-
-                                                                ';
+    <a href="/call/' . $row['car_id'] . '">
+        <div class="alert ' . $addClass . ' ' . $getParamitem['code'] . '" role="alert" ' . ((!empty($row['content']) || !empty($row['companyId']) || !empty($row['paycode']) || !empty($row['price']) || !empty($row['agreePrice']) || !empty($row['next_date'])) ? '  data-toggle="tooltip" data-original-title="' . (($row['next_date'] != '0000-00-00 00:00:00') ? ' Xatırlatma Tarixi: ' . $row['next_date'] . ' ' : "") . ' ' . ((!empty($row['content'])) ? ' Qeyd: ' . $row['content'] . ' ' : "") . ' ' . ((!empty($row['companyId'])) ? ' Şirkət: ' . $selectedCompany['title'] . ' ' : "") . ' ' . (($row['price'] != '0.00') ? ' Qiymət: ' . $row['price'] . ' ' : "") . ' ' . (($row['agreePrice'] != '0.00') ? ' Razılaşdığı Qiymət: ' . $row['agreePrice'] . ' ' : "") . ' ' . ((!empty($row['paycode'])) ? ' Ödəniş Kodu: ' . $row['paycode'] . ' ' : "") . ' Status Tarixi: ' . $row['created'] . '"' : "") . '>
+            <strong>' . $row['car_id'] . ': </strong>' . $getParamitem['title'] . '
+        </div>
+    </a>                                                                ';
         }
       }
-
       if ($today == 0) {
         echo '<p>Məlumat tapılmadı.</p>';
       }
-
       ?>
-
     <? }
     if ($userGroup == 1 || $userGroup == 2) { ?>
-
       <?
-
       $today = 0;
       $query = "SELECT * FROM call_status WHERE type IN (SELECT id FROM paramitems WHERE (code = 'confirm' OR code = 'payed') AND status = 1 AND deletedby = 0) AND id IN (SELECT MAX(id) FROM call_status GROUP BY car_id) AND created > now() - INTERVAL 60 day ORDER by fast DESC";
       $sql = mysqli_query($db, $query);
       while ($row = mysqli_fetch_array($sql)) {
-
         $today++;
-
         $getParamitem = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM paramitems WHERE id = " . $row['type']));
-
         if ($row['fast'] == 1) {
           $addClass = "alert-danger";
         } else {
           $addClass = "alert-success";
         }
-
         echo '
-
-                                                                <a href="/call/' . $row['car_id'] . '">
-                                                                    <div class="alert ' . $addClass . ' ' . $getParamitem['code'] . '" role="alert" ' . ((!empty($row['content']) || !empty($row['companyId']) || !empty($row['paycode']) || !empty($row['price']) || !empty($row['agreePrice']) || !empty($row['next_date'])) ? '  data-toggle="tooltip" data-original-title="' . (($row['next_date'] != '0000-00-00 00:00:00') ? ' Xatırlatma Tarixi: ' . $row['next_date'] . ' ' : "") . ' ' . ((!empty($row['content'])) ? ' Qeyd: ' . $row['content'] . ' ' : "") . ' ' . ((!empty($row['companyId'])) ? ' Şirkət: ' . $selectedCompany['title'] . ' ' : "") . ' ' . (($row['price'] != '0.00') ? ' Qiymət: ' . $row['price'] . ' ' : "") . ' ' . (($row['agreePrice'] != '0.00') ? ' Razılaşdığı Qiymət: ' . $row['agreePrice'] . ' ' : "") . ' ' . ((!empty($row['paycode'])) ? ' Ödəniş Kodu: ' . $row['paycode'] . ' ' : "") . ' Status Tarixi: ' . $row['created'] . '"' : "") . '>
-                                                                        <button aria-label="" class="close" data-bs-dismiss="alert"></button>
-                                                                        <strong>' . $row['car_id'] . ': </strong>' . $getParamitem['title'] . '
-                                                                    </div>
-                                                                </a>
-
-                                                            ';
+   <a href="/call/' . $row['car_id'] . '">
+       <div class="alert ' . $addClass . ' ' . $getParamitem['code'] . '" role="alert" ' . ((!empty($row['content']) || !empty($row['companyId']) || !empty($row['paycode']) || !empty($row['price']) || !empty($row['agreePrice']) || !empty($row['next_date'])) ? '  data-toggle="tooltip" data-original-title="' . (($row['next_date'] != '0000-00-00 00:00:00') ? ' Xatırlatma Tarixi: ' . $row['next_date'] . ' ' : "") . ' ' . ((!empty($row['content'])) ? ' Qeyd: ' . $row['content'] . ' ' : "") . ' ' . ((!empty($row['companyId'])) ? ' Şirkət: ' . $selectedCompany['title'] . ' ' : "") . ' ' . (($row['price'] != '0.00') ? ' Qiymət: ' . $row['price'] . ' ' : "") . ' ' . (($row['agreePrice'] != '0.00') ? ' Razılaşdığı Qiymət: ' . $row['agreePrice'] . ' ' : "") . ' ' . ((!empty($row['paycode'])) ? ' Ödəniş Kodu: ' . $row['paycode'] . ' ' : "") . ' Status Tarixi: ' . $row['created'] . '"' : "") . '>
+           <button aria-label="" class="close" data-bs-dismiss="alert"></button>
+           <strong>' . $row['car_id'] . ': </strong>' . $getParamitem['title'] . '
+       </div>  </a>                                                            ';
       }
 
       if ($today == 0) {
         echo '<p>Məlumat tapılmadı.</p>';
       }
-
       ?>
-
     <? } ?>
-
   </div>
-
 </div>
-
 </body>
-
 </html>
-
 <? include('inc/footer.php'); ?>
-
 <div class="modal fade addCustomer" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -391,7 +301,6 @@
                         while ($row = mysqli_fetch_array($sql)) {
                           echo '<option value="' . $row['title'] . '">' . $row['title'] . '</option>';
                         }
-
                         ?>
                       </select>
                     </th>
@@ -404,7 +313,6 @@
                         while ($row = mysqli_fetch_array($sql)) {
                           echo '<option value="' . $row['title'] . '">' . $row['title'] . '</option>';
                         }
-
                         ?>
                       </select>
                     </th>
@@ -421,7 +329,6 @@
                 </tbody>
               </table>
             </div>
-
             <div class="panel panel-default">
               <table class="table table-bordered table-condensed">
                 <thead>
@@ -445,7 +352,6 @@
                         while ($row = mysqli_fetch_array($sql)) {
                           echo '<option value="' . $row['id'] . '">' . $row['title'] . '</option>';
                         }
-
                         ?>
                       </select>
                     </th>
@@ -468,7 +374,6 @@
                 </tbody>
               </table>
             </div>
-
             <div class="row">
               <div class="col-12">
                 <div class="panel panel-default">
@@ -480,33 +385,23 @@
                 </div>
               </div>
             </div>
-
           </div>
-
         </div>
-
         <div class="modal-footer">
           <button id="addRow" type="submit" class="btn btn-primary"><?= lang('Yadda saxla'); ?></button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= lang('Bağla'); ?></button>
         </div>
-
       </form>
-
     </div>
   </div>
 </div>
-
 <div class="modal fade modalAddStatus" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-
       <form id="statusForm_add" enctype="multipart/form-data">
-
         <div class="modal-body">
-
           <input type="hidden" value="5" name="type">
           <input id="car_id_input" type="hidden" name="car_id" value="">
-
           <div class="form-group row mt-3 mr-0 mb-3 ml-0">
             <div class="col-xl-12">
               <select id="status_type" class="full-width select2S" name="status_type" required>
@@ -525,34 +420,24 @@
                 while ($row = mysqli_fetch_array($sql)) {
                   echo '<option value="' . $row['id'] . '" data-type="' . $row['code'] . '">' . $row['title'] . '</option>';
                 }
-
                 ?>
               </select>
             </div>
           </div>
-
           <div class="form-group row mt-3 mr-0 mb-3 ml-0">
             <div class="col-xl-12">
               <textarea class="form-control" name="note" style="height: 50px;" placeholder="Qeyd"></textarea>
             </div>
           </div>
-
           <div class="waitingData form-group row mt-3 mr-0 mb-3 ml-0" style="display:none;">
             <div class="col-xl-12">
-
               <p>Xatırlatma Tarixi:</p>
-
               <input id="next_date" class="form-control" type="datetime-local" name="next_date">
-
             </div>
-
           </div>
-
           <div class="forwardData form-group row mt-3 mr-0 mb-3 ml-0" style="display:none;">
             <div class="col-xl-12">
-
               <p><?= lang("İstifadəçi Seçin"); ?>:</p>
-
               <select name="forwardTo" class="full-width select2S" id="forwardTo">
                 <option value=""><?= lang("İstifadəçi Seçin"); ?></option>
                 <? $sql = mysqli_query($db, "SELECT * FROM users WHERE deletedby = 0 AND status = 1 ORDER by name ASC");
@@ -560,16 +445,11 @@
                   echo '<option value="' . $row['id'] . '">' . $row['name'] . ' ' . $row['surname'] . ' ' . $row['lastname'] . '</option>';
                 } ?>
               </select>
-
             </div>
-
           </div>
-
           <div class="confirmData form-group row mt-3 mr-0 mb-3 ml-0" style="display:none;">
             <div class="col-xl-12">
-
               <p><?= lang("Sığorta Şirkəti Seçin"); ?>:</p>
-
               <select name="selectCompany" class="full-width select2S" id="selectCompany">
                 <option value=""><?= lang("Sığorta Şirkəti Seçin"); ?></option>
                 <? $sql = mysqli_query($db, "SELECT id, title FROM companies WHERE deletedby = 0 AND status = 1 ORDER by title ASC");
@@ -577,177 +457,111 @@
                   echo '<option value="' . $row['id'] . '">' . $row['title'] . '</option>';
                 } ?>
               </select>
-
               <br><br>
-
               <p><?= lang("Məhsul Seçin"); ?>:</p>
-
               <select name="selectProduct" class="full-width select2S" id="selectProduct">
                 <option value="1"><?= lang('İcbari avto sığorta'); ?></option>
               </select>
-
               <br><br>
-
               <p><?= lang("Razılaşdığı Qiymət"); ?>:</p>
-
               <input class="form-control" id="agreePrice" type="number" step="0.01" name="agreePrice">
-
             </div>
-
           </div>
-
           <div class="paywaitData form-group row mt-3 mr-0 mb-3 ml-0" style="display:none;">
             <div class="col-xl-12">
-
               <p><?= lang("Sığorta Haqqı"); ?>:</p>
-
               <input class="form-control" id="price" type="number" step="0.01" name="price">
-
               <br>
-
               <p><?= lang("Ödəniş Kodu"); ?>:</p>
-
               <input class="form-control" id="paycode" type="text" name="paycode">
-
             </div>
-
           </div>
-
           <div class="successData form-group row mt-3 mr-0 mb-3 ml-0" style="display:none;">
             <div class="col-xl-12">
-
               <select name="changeUser" class="full-width selectSu">
                 <option value="" id="thisChangeUser"><?= lang('İstifadəçini dəyiş'); ?></option>
                 <?
-
                 $sql = mysqli_query($db, "SELECT id, name, surname FROM users WHERE deletedby = 0 AND id != '$user_id'");
                 while ($row = mysqli_fetch_array($sql)) {
                   echo '<option value="' . $row['id'] . '">' . $row['name'] . ' ' . $row['surname'] . '</option>';
                 }
-
                 ?>
               </select>
-
               <br>
               <br>
-
               <p><?= lang("Müqavilə nömrəsi"); ?>:</p>
-
               <input class="form-control" id="identification" type="text" name="identification">
-
               <br>
-
               <p><?= lang("Yazılma Tarixi"); ?>:</p>
-
               <input class="form-control" id="write_date" type="date" name="write_date" value="<?= date("Y-m-d"); ?>">
-
               <br>
-
               <p><?= lang("Bitmə Tarixi"); ?>:</p>
-
               <? $newEndDate = date('Y-m-d', strtotime('+1 year', strtotime(date("Y-m-d")))); ?>
-
               <input class="form-control" id="end_date" type="date" name="end_date" value="<?= $newEndDate; ?>">
-
               <br>
-
               <hr>
-
               <div class="row">
-
                 <div class="form-group col-6">
                   <input type="number" value="" step="0.01" name="allprice[]" id="allprice" placeholder="<?= lang('Biz ödədik'); ?>" class="calcprice form-control" autofocus>
                 </div>
-
                 <div class="form-group col-6">
                   <select name="paymentMethod[]" class="full-width selectSu" id="">
                     <option value="">Kart Seçin</option>
                     <?
-
                     $queryPaymentMethods = "SELECT * FROM finaccounts WHERE id != 1 AND status = 1 AND deletedby = 0";
-
                     if ($userGroup == 3) {
                       //$queryPaymentMethods .= " AND userId = '$user_id'";
                     }
-
                     $sqlGetPaymentMethods = mysqli_query($db, $queryPaymentMethods);
                     while ($rowGetPaymentMethods = mysqli_fetch_array($sqlGetPaymentMethods)) {
-
                       echo '<option value="' . $rowGetPaymentMethods['title'] . '">' . $rowGetPaymentMethods['title'] . '</option>';
                     }
-
                     ?>
                   </select>
                 </div>
-
               </div>
-
               <hr>
-
               <p><?= lang("Bonus"); ?>:</p>
-
               <input class="form-control" id="bonus" type="number" step="0.01" name="bonus">
-
               <br><br>
-
               <label for="disableEarnAll">
                 <input id="disableEarnAll" type="checkbox" value="1" name="disableEarnAll"> Komissiyasız!
               </label>
-
               <br><br>
-
               <label for="disableEarn">
                 <input id="disableEarn" type="checkbox" value="1" name="disableEarn"> Operatora Komissiyasız!
               </label>
-
             </div>
-
           </div>
-
           <div class="paymentData form-group row mt-3 mr-0 mb-3 ml-0" style="display:none;">
             <div class="col-xl-12">
-
               <div class="row">
-
                 <input type="hidden" name="paymentMethod[]" value="Özü ödədi">
-
                 <div class="form-group col-12">
                   <input type="number" value="" step="0.01" name="allprice[]" id="allprice" placeholder="<?= lang('Özü ödədi'); ?>" class="calcprice form-control" autofocus>
                 </div>
-
                 <hr>
-
                 <div class="form-group col-6">
                   <input type="number" value="" step="0.01" name="allprice[]" id="allprice" placeholder="<?= lang('Bizə ödədi'); ?>" class="calcprice form-control" autofocus>
                 </div>
-
                 <div class="form-group col-6">
                   <select name="paymentMethod[]" class="full-width selectPa" id="">
                     <option value="">Kart Seçin</option>
                     <?
-
                     $queryPaymentMethods = "SELECT * FROM finaccounts WHERE id != 1 AND status = 1 AND deletedby = 0";
-
                     if ($userGroup == 3) {
                       //$queryPaymentMethods .= " AND userId = '$user_id'";
                     }
-
                     $sqlGetPaymentMethods = mysqli_query($db, $queryPaymentMethods);
                     while ($rowGetPaymentMethods = mysqli_fetch_array($sqlGetPaymentMethods)) {
-
                       echo '<option value="' . $rowGetPaymentMethods['title'] . '">' . $rowGetPaymentMethods['title'] . '</option>';
                     }
-
                     ?>
                   </select>
                 </div>
-
               </div>
-
             </div>
-
           </div>
-
           <div class="form-group row mt-3 mr-0 mb-3 ml-0">
             <div class="col-xl-12">
               <label for="fast">
@@ -755,19 +569,14 @@
               </label>
             </div>
           </div>
-
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary addStatusButton">Yadda saxla</button>
           </div>
-
         </div>
-
       </form>
-
     </div>
   </div>
 </div>
-
 <div class="modal fade modalAddPayment" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
