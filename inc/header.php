@@ -109,6 +109,9 @@
         <a href="/finance" class="app-sidebar-link <? if($_GET['action'] == 'finance'){ echo 'active'; } ?>">
           <i class="fa fa-money" aria-hidden="true"></i>
         </a>
+                <a href="/finance2" class="app-sidebar-link <? if($_GET['action'] == 'finance2'){ echo 'active'; } ?>">
+          <i class="fa fa-money" aria-hidden="true"></i>
+        </a>
         <? } ?>
         <? if($userGroup == 1 || $userGroup == 2){ ?>
         <a href="/settings" class="app-sidebar-link <? if($_GET['action'] == 'settings'){ echo 'active'; } ?>">

@@ -166,6 +166,9 @@
               case "finance" :
                 include_once("finance.php");
                 break;
+              case "finance2" :
+                include_once("finance2.php");
+                break;
               case "events" :
                 include_once("events.php");
                 break;
