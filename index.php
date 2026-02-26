@@ -1,7 +1,5 @@
 <?php
-
     session_start();
-
     //if (substr_count($_SERVER[‘HTTP_ACCEPT_ENCODING’], ‘gzip’)) ob_start(“ob_gzhandler”); else ob_start();
 
     header('Content-Type: text/html; charset=utf-8');
@@ -127,8 +125,8 @@
 <?php
 } else {
 
-    if(!empty($user_id)){
-
+ #if(!empty($user_id)){
+      if(true){
         ob_start();
 
             switch ($_GET["action"]) {
