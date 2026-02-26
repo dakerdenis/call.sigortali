@@ -269,33 +269,35 @@ if (isset($_SESSION['login']) && isset($_SESSION['id'])) {
     } else if ($_GET['type'] == 10) { // orders add
 
         $title = htmlspecialchars(trim($_POST['title']));
-        $amount = htmlspecialchars(trim($_POST['amount']));
         $note = htmlspecialchars(trim($_POST['note']));
         $paydate = htmlspecialchars(trim($_POST['paydate']));
         $to = htmlspecialchars(trim($_POST['to']));
         $from = htmlspecialchars(trim($_POST['from']));
 
-        $car_ids = $_POST['car_ids'];
-        $cost_ids = $_POST['cost_ids'];
+        $car_ids = $_POST['car_ids'] ?? [];
+        $cost_ids = $_POST['cost_ids'] ?? [];
 
         $totalAmount = 0;
         $totalCost = 0;
 
-        $sql = 'INSERT INTO orders ( title, accountId, toAccount, note, createdby ) VALUES ( "' . $title . '", "' . $from . '", "' . $to . '", "' . $note . '", "' . $user_id . '" )';
+        $sql = 'INSERT INTO orders ( title, accountId, toAccount, note, createdby ) 
+            VALUES ( "' . $title . '", "' . $from . '", "' . $to . '", "' . $note . '", "' . $user_id . '" )';
+
         $query = mysqli_query($db, $sql);
+
         if ($query) {
 
-            $itemId = mysqli_insert_id($db);
+            $orderId = mysqli_insert_id($db); // ← сохраняем ID orders
 
             foreach ($car_ids as $car_id) {
-                mysqli_query($db, "UPDATE payments SET teslimId = '$itemId' WHERE id = '$car_id'");
+                mysqli_query($db, "UPDATE payments SET teslimId = '$orderId' WHERE id = '$car_id'");
 
                 $getPayment = mysqli_fetch_array(mysqli_query($db, "SELECT amount FROM payments WHERE id = '$car_id'"));
                 $totalAmount += $getPayment['amount'];
             }
 
             foreach ($cost_ids as $cost_id) {
-                mysqli_query($db, "UPDATE payments SET teslimId = '$itemId' WHERE id = '$cost_id'");
+                mysqli_query($db, "UPDATE payments SET teslimId = '$orderId' WHERE id = '$cost_id'");
 
                 $getPayment = mysqli_fetch_array(mysqli_query($db, "SELECT amount FROM payments WHERE id = '$cost_id'"));
                 $totalCost += $getPayment['amount'];
@@ -303,20 +305,16 @@ if (isset($_SESSION['login']) && isset($_SESSION['id'])) {
 
             $transfer = ($totalAmount - $totalCost);
 
-            $sql = 'INSERT INTO payments ( category, fromAccount, toAccount, orderId, amount, paydate, title, teslimId, status, createdby ) VALUES ( "Transfer", "' . $from . '", "' . $to . '", "' . $itemId . '", "' . $transfer . '", "' . $paydate . '", "' . $note . '", 3, 1, "' . $user_id . '" )';
-            $query = mysqli_query($db, $sql);
-            if ($query) {
+            mysqli_query($db, 'INSERT INTO payments 
+            ( category, fromAccount, toAccount, orderId, amount, paydate, title, teslimId, status, createdby ) 
+            VALUES 
+            ( "Transfer", "' . $from . '", "' . $to . '", "' . $orderId . '", "' . $transfer . '", "' . $paydate . '", "' . $note . '", 3, 1, "' . $user_id . '" )');
 
-                $itemId = mysqli_insert_id($db);
-
-                echo "1";
-            } else {
-                echo mysqli_error($db);
-            }
-
-            echo $itemId;
+            echo $orderId; // ← возвращаем ТОЛЬКО ID orders
+            exit;
         } else {
             echo mysqli_error($db);
+            exit;
         }
     } else if ($_GET['type'] == 11) { // confirm
 
