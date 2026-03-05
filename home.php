@@ -581,12 +581,12 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel"><?= lang('Ödəniş Et'); ?></h5>
+        <h5 class="modal-title" id="exampleModalLabel"><?= lang('Ödəniş Et'); ?> </h5>
         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-
+      <p style="font-size: 13px;">Bu onun üçündür ki müştəri həmin an ödənişi etməyib debitordu lakin bir müddət sonra borcunu ödüyüb onda bu şəkildə əsas səhifədən qeyd edirik</p>
       <div class="modal-body" style="overflow: hidden;">
 
         <form id="form_add_payment">

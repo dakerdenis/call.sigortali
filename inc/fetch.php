@@ -293,9 +293,10 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
                 $query .= ' )';
             }
 
-            if ($_POST['fromAccount'] !='') {
-              $query .= ' AND ( fromAccount = "'.str_replace(' ', '%', $_POST['account']).'" OR toAccount = "'.str_replace(' ', '%', $_POST['account']).'" )';
-            }
+if (!empty($_POST['fromAccount'])) {
+  $fa = mysqli_real_escape_string($db, $_POST['fromAccount']);
+  $query .= " AND (fromAccount = '$fa' OR toAccount = '$fa')";
+}
 
             if ($_POST['account'] !='') {
               $query .= ' AND ( fromAccount LIKE "'.str_replace(' ', '%', $_POST['account']).'" OR toAccount LIKE "'.str_replace(' ', '%', $_POST['account']).'" )';
@@ -329,6 +330,57 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
               $query .= ")";
         
             }
+            // --- NEW FILTERS (finance2) ---
+$date_from = $_POST['date_from'] ?? '';
+$date_to   = $_POST['date_to'] ?? '';
+
+$amount_min = $_POST['amount_min'] ?? '';
+$amount_max = $_POST['amount_max'] ?? '';
+
+$category2 = $_POST['category2'] ?? '';   // category exact
+$hesabat_id = $_POST['hesabat_id'] ?? ''; // teslimId
+$seh_no = $_POST['seh_no'] ?? '';         // orderId search (Şəhadətnamə)
+
+// Date range
+if (!empty($date_from) && !empty($date_to)) {
+    $df = mysqli_real_escape_string($db, $date_from);
+    $dt = mysqli_real_escape_string($db, $date_to);
+    $query .= " AND DATE(paydate) BETWEEN '$df' AND '$dt'";
+} else if (!empty($date_from)) {
+    $df = mysqli_real_escape_string($db, $date_from);
+    $query .= " AND DATE(paydate) >= '$df'";
+} else if (!empty($date_to)) {
+    $dt = mysqli_real_escape_string($db, $date_to);
+    $query .= " AND DATE(paydate) <= '$dt'";
+}
+
+// Amount range
+if ($amount_min !== '' && is_numeric($amount_min)) {
+    $minv = (float)$amount_min;
+    $query .= " AND amount >= $minv";
+}
+if ($amount_max !== '' && is_numeric($amount_max)) {
+    $maxv = (float)$amount_max;
+    $query .= " AND amount <= $maxv";
+}
+
+// Category exact
+if (!empty($category2)) {
+    $cat = mysqli_real_escape_string($db, $category2);
+    $query .= " AND category = '$cat'";
+}
+
+// Hesabat ID = teslimId
+if (!empty($hesabat_id)) {
+    $hid = (int)$hesabat_id;
+    $query .= " AND teslimId = $hid";
+}
+
+// Şəhadətnamə nömrəsi = payments.orderId (LIKE)
+if (!empty($seh_no)) {
+    $sn = mysqli_real_escape_string($db, $seh_no);
+    $query .= " AND orderId LIKE '%$sn%'";
+}
             
             $query .= ' ORDER BY id DESC';
 
