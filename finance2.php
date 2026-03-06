@@ -280,6 +280,10 @@
         loadAll();
 
 function load_data_payments(page, query = '', account = '' , category = '', limit = '') {
+
+    CURRENT_ACCOUNT = account;   // <-- ВАЖНО
+    CURRENT_LIMIT = limit || CURRENT_LIMIT; // <-- ВАЖНО
+
     $("#dynamic_content_payments").css({ opacity: 0.5 });
 
     $.ajax({
@@ -372,18 +376,29 @@ success: function(response) {
 
         }));
 
-        $(document).on('click', '.page-link', function() {
-            var page = $(this).data('page_number');
-            if (!page) return;
-            var query = $(".search-input").val();
-            var limit = $('#limit').val();
-            load_data_payments(page, query, '', '', limit);
-        });
+$(document).on('click', '.page-link', function() {
+    var page = $(this).data('page_number');
+    if (!page) return;
 
-        $(document).on('click', '.search_account', function() {
-            var id = $(this).data('id');
-            load_data_payments(1, '', id, '', 1000);
-        });
+    var query = $(".search-input").val() || '';
+    var limit = $('#limit').val();
+
+    CURRENT_LIMIT = limit;
+
+    load_data_payments(page, query, CURRENT_ACCOUNT, '', limit);
+});
+
+$(document).on('click', '.search_account', function() {
+    var id = $(this).data('id');
+
+    var limit = $('#limit').val();              // текущий лимит (10/25/50/100/...)
+    var query = $(".search-input").val() || ''; // если у тебя реально есть это поле
+
+    CURRENT_ACCOUNT = id;
+    CURRENT_LIMIT = limit;
+
+    load_data_payments(1, query, id, '', limit);
+});
 
         $("#limit").on("change", function() {
             var limit = $(this).val();
