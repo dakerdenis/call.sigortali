@@ -1,103 +1,153 @@
 <?php include('inc/header.php'); ?>
 <?php
-    $finId = $_GET['id'];
-    $getFinAccount = mysqli_fetch_array(mysqli_query($db, "SELECT title FROM finaccounts WHERE id = $finId"));
-    $finTitle = $getFinAccount['title'];
+$finId = $_GET['id'];
+$getFinAccount = mysqli_fetch_array(mysqli_query($db, "SELECT title FROM finaccounts WHERE id = $finId"));
+$finTitle = $getFinAccount['title'];
 ?>
-    <div class="projects-section">
-        <div id="dynamic_content" class="customersTable table-responsive">
-            <style>
-                p,
-                label {
+<div class="projects-section">
+    <div id="dynamic_content" class="customersTable table-responsive">
+        <style>
+            p,
+            label {
                 font:
                     1rem 'Fira Sans',
                     sans-serif;
-                }
-                input {
+            }
+            input {
                 margin: 0.4rem;
-                }
-            </style>
-            <form id="form_add_order">
-                <input type="hidden" name="from" value="<?= $finTitle; ?>">
-                <div class="form-group">
-                    <label for="title" class="col-form-label"><?= lang('Hesabat adı'); ?>:</label>
-                    <input type="text" name="title" class="form-control" placeholder="Tarix" value="Gündəlik Hesabat" id="title" required>
-                </div>
-                <div class="form-group">
-                    <label for="title" class="col-form-label"><?= lang('Hara ödənilib'); ?>:</label>
-                    <select name="to" class="form-control" required>
-                        <option value=""><?= lang('Hara') ?></option>
-                                <?
-                                    $queryPaymentMethods = "SELECT * FROM finaccounts WHERE id != 1 AND status = 1 AND deletedby = 0";
+            }
+            .section-title {
+                font-weight: 600;
+                margin-top: 20px;
+                margin-bottom: 10px;
+            }
+            .table-wrapper {
+                max-height: 400px;
+                overflow: auto;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+            }
+            .table thead th {
+                position: sticky;
+                top: 0;
+                background: #f8f9fa;
+                z-index: 1;
+            }
+            .form-section {
+                background: #fff;
+                border: 1px solid #dee2e6;
+                border-radius: 10px;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            .checkbox-cell {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .total-row {
+                font-weight: 600;
+                background: #f8f9fa;
+            }
+        </style>
 
-                                    if($userGroup == 3){
-                                        //$queryPaymentMethods .= " AND userId = '$user_id'";
-                                    }
-                                    $sqlGetPaymentMethods = mysqli_query($db, $queryPaymentMethods);
-                                    while($rowGetPaymentMethods = mysqli_fetch_array($sqlGetPaymentMethods)){
-                                        echo '<option value="'.$rowGetPaymentMethods['title'].'">'.$rowGetPaymentMethods['title'].'</option>';
-                                    }
-                                ?>
-                    </select>
-                </div>
-                <br>
-                <p>Mədaxillər</p>
-                <div  style="max-height: 400px; overflow: auto;">
-                <table class="table table-striped">
+
+        <form id="form_add_order">
+            <input type="hidden" name="from" value="<?= $finTitle; ?>">
+            <div class="form-group">
+                <label for="title" class="col-form-label"><?= lang('Hesabat adı'); ?>:</label>
+                <input type="text" name="title" class="form-control" placeholder="Tarix" value="Gündəlik Hesabat"
+                    id="title" required>
+            </div>
+
+
+            
+            <div class="form-group">
+                <label for="title" class="col-form-label"><?= lang('Hara ödənilib'); ?>:</label>
+                <select name="to" class="form-control" required>
+                    <option value=""><?= lang('Hara') ?></option>
+                    <?
+                    $queryPaymentMethods = "SELECT * FROM finaccounts WHERE id != 1 AND status = 1 AND deletedby = 0";
+
+                    if ($userGroup == 3) {
+                        //$queryPaymentMethods .= " AND userId = '$user_id'";
+                    }
+                    $sqlGetPaymentMethods = mysqli_query($db, $queryPaymentMethods);
+                    while ($rowGetPaymentMethods = mysqli_fetch_array($sqlGetPaymentMethods)) {
+                        echo '<option value="' . $rowGetPaymentMethods['title'] . '">' . $rowGetPaymentMethods['title'] . '</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+            <br>
+<h5 class="section-title">Ödənişlər</h5>
+            <div class="table-wrapper">
+                <table class="table table-hover table-sm align-middle">
                     <thead>
                         <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">ID</th>
-                        <th scope="col"><input type="checkbox" id="checkMedaxil" name="checkMedaxil" value="checkMedaxil" /> DQN</th>
-                        <th scope="col">Şəhadətnamə nömrəsi</th>
-                        <th scope="col">Kart</th>
-                        <th scope="col">Məbləğ</th>
-                        <th scope="col">Tarix</th>
-                        <th scope="col">Kateqoriya</th>
-                        <th scope="col">Qeyd</th>
-                        <th scope="col">Operator</th>
+                            <th scope="col">#</th>
+                            <th scope="col">ID</th>
+                            <th scope="col"><input type="checkbox" id="checkMedaxil" name="checkMedaxil"
+                                    value="checkMedaxil" /> DQN</th>
+                            <th scope="col">Şəhadətnamə nömrəsi</th>
+                            <th scope="col">Kart</th>
+                            <th scope="col">Məbləğ</th>
+                            <th scope="col">Tarix</th>
+                            <th scope="col">Kateqoriya</th>
+                            <th scope="col">Qeyd</th>
+                            <th scope="col">Operator</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
-                            $dqn = 0;
-                            $totalAmount = 0;
-                            $query = "SELECT * FROM payments WHERE fromAccount != 'Özü ödədi' AND toAccount != 'Özü ödədi' AND toAccount = '$finTitle' AND teslimId = 0 AND deletedby = 0 ";
-                            if(!empty($finId)){
-                                $query .= " AND toAccount = '$finTitle'";
+                        $dqn = 0;
+                        $totalAmount = 0;
+$query = "SELECT * FROM payments 
+WHERE (category = 'Sığorta ödənişləri' OR category = 'Köçürmə ilə')
+AND fromAccount != 'Özü ödədi' 
+AND toAccount != 'Özü ödədi' 
+AND toAccount = '$finTitle' 
+AND teslimId = 0 
+AND deletedby = 0 ";
+                        $query .= " ORDER BY created DESC";
+                        $sql = mysqli_query($db, $query);
+                        while ($row = mysqli_fetch_array($sql)) {
+                            $getCreated = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM users WHERE id = " . $row['createdby']));
+                            $dqn++;
+                            if (empty($row['orderId'])) {
+                                $getOrder = mysqli_fetch_array(mysqli_query($db, "SELECT identification FROM call_status WHERE identification != '' AND car_id = '" . $row['fromAccount'] . "' ORDER by id DESC LIMIT 1"));
+                                $row['orderId'] = $getOrder['identification'];
                             }
-                            $query .= " ORDER BY created DESC";
-                            $sql = mysqli_query($db, $query);
-                            while($row = mysqli_fetch_array($sql)){
-                                $getCreated = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM users WHERE id = ".$row['createdby']));
-                                $dqn++;
-                                if(empty($row['orderId'])){
-                                    $getOrder = mysqli_fetch_array(mysqli_query($db, "SELECT identification FROM call_status WHERE identification != '' AND car_id = '".$row['fromAccount']."' ORDER by id DESC LIMIT 1"));
-                                    $row['orderId'] = $getOrder['identification'];
-                                }
-                                echo '
+                            echo '
                                     <tr>
-                                        <th scope="row">'.$dqn.'</th>
-                                        <td>'.$row['id'].'</td>
+                                        <th scope="row">' . $dqn . '</th>
+                                        <td>' . $row['id'] . '</td>
                                         <td>
-                                        <div>
-                                            <input type="checkbox" id="car_ids_'.$row['id'].'" name="car_ids[]" value="'.$row['id'].'" class="medaxilCheckboxs" />
-                                            <label for="car_ids_'.$row['id'].'">'.$row['fromAccount'].'</label>
+                                        <div class="form-check checkbox-cell">
+                                        <input
+                                        class="form-check-input medaxilCheckboxs"
+                                        type="checkbox"
+                                        id="car_ids_'.$row['id'].'"
+                                        name="car_ids[]"
+                                        value="'.$row['id'].'">    
+                                        <label class="form-check-label" for="car_ids_'.$row['id'].'">
+                                        '.$row['fromAccount'].'
+                                        </label>
                                         </div>
                                         </td>
-                                        <td>'.$row['orderId'].'</td>
-                                        <td>'.$row['toAccount'].'</td>
-                                        <td>'.$row['amount'].' AZN</td>
-                                        <td>'.date("d.m.Y H:i", strtotime($row['created'])).'</td>
-                                        <td>'.$row['category'].'</td>
-                                        <td>'.$row['title'].'</td>
-                                        <td>'.$getCreated['name'].' '.$getCreated['surname'].'</td>
+                                        <td>' . $row['orderId'] . '</td>
+                                        <td>' . $row['toAccount'] . '</td>
+                                        <td>' . $row['amount'] . ' AZN</td>
+                                        <td>' . date("d.m.Y H:i", strtotime($row['created'])) . '</td>
+                                        <td>' . $row['category'] . '</td>
+                                        <td>' . $row['title'] . '</td>
+                                        <td>' . $getCreated['name'] . ' ' . $getCreated['surname'] . '</td>
                                     </tr>
                                 ';
-                                $totalAmount += $row['amount'];
-                            }
-                        ?>
-                        <tr>
+                            $totalAmount += $row['amount'];
+                        }
+                        ?> 
+                        <tr class="total-row">
                             <th scope="row">Toplam:</th>
                             <td></td>
                             <td></td>
@@ -115,65 +165,76 @@
                     document.getElementById('checkMedaxil').addEventListener('change', function() {
                         // Get the state of the "checkMedaxil" checkbox
                         const isChecked = this.checked;
-                        
+
                         // Get all checkboxes with the class 'medaxilCheckboxs'
                         const checkboxes = document.querySelectorAll('.medaxilCheckboxs');
-                        
+
                         // Update the checked state of each checkbox
                         checkboxes.forEach(checkbox => {
                             checkbox.checked = isChecked;
                         });
                     });
                 </script>
-                </div>
-                <br>
-                <p>Xərclər</p>
-                <div  style="max-height: 400px; overflow: auto;">
-                <table class="table table-striped">
+            </div>
+            <br>
+            <h5 class="section-title">Xərclər</h5>
+            <div class="table-wrapper">
+                <table class="table table-hover table-sm align-middle">
                     <thead>
                         <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">ID</th>
-                        <th scope="col"><input type="checkbox" id="checkXerc" name="checkXerc" value="checkXerc" /> Kart</th>
-                        <th scope="col">Məbləğ</th>
-                        <th scope="col">Tarix</th>
-                        <th scope="col">Qeyd</th>
-                        <th scope="col">Kateqoriya</th>
-                        <th scope="col">İstifadəçi</th>
+                            <th scope="col">#</th>
+                            <th scope="col">ID</th>
+                            <th scope="col"><input type="checkbox" id="checkXerc" name="checkXerc" value="checkXerc" />
+                                Kart</th>
+                            <th scope="col">Məbləğ</th>
+                            <th scope="col">Tarix</th>
+                            <th scope="col">Qeyd</th>
+                            <th scope="col">Kateqoriya</th>
+                            <th scope="col">İstifadəçi</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
-                            $cost = 0;
-                            $totalCost = 0;
-                            $query = "SELECT * FROM payments WHERE (category != 'Sığorta ödənişləri'  AND category != 'Transfer') AND teslimId = 0 AND deletedby = 0";
-                            if(!empty($finId)){
-                                $query .= " AND fromAccount = '$finTitle'";
-                            }
-                            $query .= " ORDER BY created DESC";
-                            $sql = mysqli_query($db, $query);
-                            while($row = mysqli_fetch_array($sql)){
-                                $getCreated = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM users WHERE id = ".$row['createdby']));
-                                $cost++;
-                                echo '
+                        $cost = 0;
+                        $totalCost = 0;
+                        $query = "SELECT * FROM payments 
+                        WHERE category NOT IN (
+                        'Sığorta ödənişləri',
+                        'Transfer',
+                        'Məxaric',
+                        'Mədaxil',
+                        'Köçürmə ilə'
+                        )
+                        AND teslimId = 0 
+                        AND deletedby = 0";
+                        
+                        if (!empty($finId)) {
+                            $query .= " AND fromAccount = '$finTitle'";
+                        }
+                        $query .= " ORDER BY created DESC";
+                        $sql = mysqli_query($db, $query);
+                        while ($row = mysqli_fetch_array($sql)) {
+                            $getCreated = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM users WHERE id = " . $row['createdby']));
+                            $cost++;
+                            echo '
                                     <tr>
-                                        <th scope="row">'.$cost.'</th>
-                                        <td>'.$row['id'].'</td>
+                                        <th scope="row">' . $cost . '</th>
+                                        <td>' . $row['id'] . '</td>
                                         <td>
                                         <div>
-                                            <input type="checkbox" id="cost_ids_'.$row['id'].'" name="cost_ids[]" value="'.$row['id'].'" class="xercCheckboxs" />
-                                            <label for="cost_ids_'.$row['id'].'">'.$row['fromAccount'].'</label>
+                                            <input type="checkbox" id="cost_ids_' . $row['id'] . '" name="cost_ids[]" value="' . $row['id'] . '" class="xercCheckboxs" />
+                                            <label for="cost_ids_' . $row['id'] . '">' . $row['fromAccount'] . '</label>
                                         </div>
                                         </td>
-                                        <td>'.$row['amount'].' AZN</td>
-                                        <td>'.date("d.m.Y H:i", strtotime($row['created'])).'</td>
-                                        <td>'.$row['title'].'</td>
-                                        <td>'.$row['category'].'</td>
-                                        <td>'.$getCreated['name'].' '.$getCreated['surname'].'</td>
+                                        <td>' . $row['amount'] . ' AZN</td>
+                                        <td>' . date("d.m.Y H:i", strtotime($row['created'])) . '</td>
+                                        <td>' . $row['title'] . '</td>
+                                        <td>' . $row['category'] . '</td>
+                                        <td>' . $getCreated['name'] . ' ' . $getCreated['surname'] . '</td>
                                     </tr>
                                 ';
-                                $totalCost += $row['amount'];
-                            }
+                            $totalCost += $row['amount'];
+                        }
                         ?>
                         <tr>
                             <th scope="row">Toplam:</th>
@@ -199,55 +260,65 @@
                         });
                     });
                 </script>
-                </div>
-                <br>
-                <p>Transferlər</p>
-                <div  style="max-height: 400px; overflow: auto;">
-                <table class="table table-striped">
+            </div>
+            <br>
+                        <h5 class="section-title">Dövriyyə</h5>
+            <div class="table-wrapper">
+                <table class="table table-hover table-sm align-middle">
                     <thead>
                         <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">ID</th>
-                        <th scope="col"><input type="checkbox" id="checkTransfer" name="checkTransfer" value="checkTransfer" /> Kart</th>
-                        <th scope="col">Məbləğ</th>
-                        <th scope="col">Tarix</th>
-                        <th scope="col">Qeyd</th>
-                        <th scope="col">Kateqoriya</th>
-                        <th scope="col">İstifadəçi</th>
+                            <th scope="col">#</th>
+                            <th scope="col">ID</th>
+                            <th scope="col"><input type="checkbox" id="checkTransfer" name="checkTransfer"
+                                    value="checkTransfer" /> Kart</th>
+                            <th scope="col">Hara</th>
+                            <th scope="col">Məbləğ</th>
+                            <th scope="col">Tarix</th>
+                            <th scope="col">Qeyd</th>
+                            <th scope="col">Kateqoriya</th>
+                            <th scope="col">İstifadəçi</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
-                            $cost = 0;
-                            $totalCost = 0;
-                            $query = "SELECT * FROM payments WHERE (category != 'Sığorta ödənişləri' AND category = 'Transfer') AND teslimId = 0 AND deletedby = 0";
-                            if(!empty($finId)){
-                                $query .= " AND fromAccount = '$finTitle'";
-                            }
-                            $query .= " ORDER BY created DESC";
-                            $sql = mysqli_query($db, $query);
-                            while($row = mysqli_fetch_array($sql)){
-                                $getCreated = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM users WHERE id = ".$row['createdby']));
-                                $cost++;
-                                echo '
-                                    <tr>
-                                        <th scope="row">'.$cost.'</th>
-                                        <td>'.$row['id'].'</td>
-                                        <td>
-                                        <div>
-                                            <input type="checkbox" id="cost_ids_'.$row['id'].'" name="cost_ids[]" value="'.$row['id'].'" class="transferCheckboxs" />
-                                            <label for="cost_ids_'.$row['id'].'">'.$row['fromAccount'].'</label>
-                                        </div>
-                                        </td>
-                                        <td>'.$row['amount'].' AZN</td>
-                                        <td>'.date("d.m.Y H:i", strtotime($row['created'])).'</td>
-                                        <td>'.$row['title'].'</td>
-                                        <td>'.$row['category'].'</td>
-                                        <td>'.$getCreated['name'].' '.$getCreated['surname'].'</td>
-                                    </tr>
-                                ';
-                                $totalCost += $row['amount'];
-                            }
+                        $cost = 0;
+                        $totalCost = 0;
+                        $query = "SELECT * FROM payments 
+                        WHERE category IN (
+                        'Transfer',
+                        'Məxaric',
+                        'Mədaxil'
+                        )
+                        AND teslimId = 0 
+                        AND deletedby = 0";
+                        if (!empty($finId)) {
+                            $query .= " AND fromAccount = '$finTitle'";
+                        }
+                        $query .= " ORDER BY created DESC";
+                        $sql = mysqli_query($db, $query);
+                        while ($row = mysqli_fetch_array($sql)) {
+                            $getCreated = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM users WHERE id = " . $row['createdby']));
+                            $cost++;
+                            echo '
+<tr>
+    <th scope="row">' . $cost . '</th>
+    <td>' . $row['id'] . '</td>
+    <td>
+    <div>
+        <input type="checkbox" id="cost_ids_' . $row['id'] . '" name="cost_ids[]" value="' . $row['id'] . '" class="transferCheckboxs" />
+        <label for="cost_ids_' . $row['id'] . '">' . $row['fromAccount'] . '</label>
+    </div>
+    </td>
+    <td>' . $row['toAccount'] . '</td>
+    <td>' . $row['amount'] . ' AZN</td>
+    <td>' . date("d.m.Y H:i", strtotime($row['created'])) . '</td>
+    <td>' . $row['title'] . '</td>
+    <td>' . $row['category'] . '</td>
+    <td>' . $getCreated['name'] . ' ' . $getCreated['surname'] . '</td>
+</tr>
+';
+                            $totalCost += $row['amount'];
+                        }
                         ?>
                         <tr>
                             <th scope="row">Toplam:</th>
@@ -261,7 +332,7 @@
                         </tr>
                     </tbody>
                 </table>
-            
+
                 <script>
                     document.getElementById('checkTransfer').addEventListener('change', function() {
                         // Get the state of the "checkMedaxil" checkbox
@@ -274,24 +345,30 @@
                         });
                     });
                 </script>
-                </div>
-                <br>
-                <div class="form-group">
-                    <label for="date" class="col-form-label"><?= lang('Tarix'); ?>:</label>
-                    <input type="date" name="paydate" class="form-control" placeholder="Tarix" value="<?= date("Y-m-d"); ?>" id="date">
-                </div>
-                <div class="form-group">
-                    <label for="note" class="col-form-label"><?= lang('Qeyd') ?>:</label>
-                    <textarea name="note" class="form-control" cols="20" rows="3" placeholder="<?= lang('Qeyd') ?>"></textarea>
-                </div>
-                <br>
-                <div class="modal-footer">
-                    <button id="addRow" type="submit" class="btn btn-primary"><?= lang('Yadda Saxla') ?></button>
-                </div>
-            </form>
-        </div>
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="date" class="col-form-label"><?= lang('Tarix'); ?>:</label>
+                <input type="date" name="paydate" class="form-control" placeholder="Tarix" value="<?= date("Y-m-d"); ?>"
+                    id="date">
+            </div>
+            <div class="form-group">
+                <label for="note" class="col-form-label"><?= lang('Qeyd') ?>:</label>
+                <textarea name="note" class="form-control" cols="20" rows="3"
+                    placeholder="<?= lang('Qeyd') ?>"></textarea>
+            </div>
+            <br>
+            <div class="modal-footer">
+                <button id="addRow" type="submit" class="btn btn-success px-4">
+<i class="bi bi-save"></i>
+<?= lang('Yadda Saxla') ?>
+</button>
+            </div>
+        </form>
     </div>
+</div>
 </body>
+
 </html>
 <? include('inc/footer.php'); ?>
 <script>
@@ -301,16 +378,16 @@
             type: 'POST',
             url: "/index.php?action=add&type=10",
             data: new FormData(this),
-                contentType: false,
-                cache: false,
-                processData: false,
+            contentType: false,
+            cache: false,
+            processData: false,
             beforeSend: function() {
                 $("#dynamic_content").html('<center><div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status"><span class="sr-only"></span></div></center>');
                 $('#addRow').prop('disabled', true);
                 $("#addRow").html('<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>');
             },
             success: function(response) {
-                $(location).attr('href', '/orderitems/'+response);
+                $(location).attr('href', '/orderitems/' + response);
             }
         });
         return false;

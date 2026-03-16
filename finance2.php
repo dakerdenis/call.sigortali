@@ -164,6 +164,9 @@
             <label class="form-label"><?= lang('Kateqoriya'); ?>:</label>
             <select name="category" class="form-select select2P" required>
               <option value="<?= lang('Sığorta ödənişləri'); ?>"><?= lang('Sığorta ödənişləri'); ?></option>
+              <option value="<?= lang('Köçürmə ilə'); ?>"><?= lang('Köçürmə ilə'); ?></option>
+              <option value="<?= lang('Mədaxil'); ?>"><?= lang('Mədaxil'); ?></option>
+              <option value="<?= lang('Məxaric'); ?>"><?= lang('Məxaric'); ?></option>
               <option value="<?= lang('Transfer'); ?>"><?= lang('Transfer'); ?></option>
               <option value="<?= lang('Mobil nömrə'); ?>"><?= lang('Mobil nömrə'); ?></option>
               <option value="<?= lang('Əmək haqları'); ?>"><?= lang('Əmək haqları'); ?></option>

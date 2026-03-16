@@ -243,20 +243,33 @@ if (isset($_SESSION['login']) && isset($_SESSION['id'])) {
         $category = htmlspecialchars(trim($_POST['category']));
         $from = htmlspecialchars(trim($_POST['from']));
         $to = htmlspecialchars(trim($_POST['to']));
-        $amount = htmlspecialchars(trim($_POST['amount']));
+        $amount = floatval($_POST['amount']);
         $note = htmlspecialchars(trim($_POST['note']));
         $paydate = htmlspecialchars(trim($_POST['paydate']));
-        //$paydate = date("Y-m-d");
-
         $identification = htmlspecialchars(trim($_POST['identification']));
 
-        if (empty($identification)) {
-
-            $getLastIdentification = mysqli_fetch_array(mysqli_query($db, "SELECT identification FROM call_status WHERE (car_id = '$from' OR car_id = '$to') AND identification != '' ORDER by id DESC LIMIT 1"));
-            $identification = $getLastIdentification['identification'];
+        if (empty($from) || empty($to) || $amount <= 0) {
+            echo "Error: wrong data";
+            exit;
         }
 
-        $sql = 'INSERT INTO payments ( category, fromAccount, toAccount, orderId, amount, paydate, title, status, createdby ) VALUES ( "' . $category . '", "' . $from . '", "' . $to . '", "' . $identification . '", "' . $amount . '", "' . $paydate . '", "' . $note . '", 1, "' . $user_id . '" )';
+        if (empty($identification)) {
+            $getLastIdentification = mysqli_fetch_array(mysqli_query($db, "
+            SELECT identification 
+            FROM call_status 
+            WHERE (car_id = '$from' OR car_id = '$to') 
+            AND identification != '' 
+            ORDER by id DESC 
+            LIMIT 1
+        "));
+            $identification = $getLastIdentification['identification'] ?? '';
+        }
+
+        $sql = "INSERT INTO payments 
+        (category, fromAccount, toAccount, orderId, amount, paydate, title, status, createdby) 
+        VALUES 
+        ('$category','$from','$to','$identification','$amount','$paydate','$note',1,'$user_id')";
+
         $query = mysqli_query($db, $sql);
         if ($query) {
 

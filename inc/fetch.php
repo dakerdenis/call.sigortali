@@ -393,90 +393,84 @@ AND toAccount='Özü ödədi'
     $query_alltotal = 'SELECT id FROM orders';
     $query = "SELECT * FROM orders WHERE deletedby = 0";
 
-    // --- NEW FILTERS for orders ---
-    $filters = $_POST['filters'] ?? [];
+    $date_from  = isset($_POST['date_from']) ? trim($_POST['date_from']) : '';
+    $date_to    = isset($_POST['date_to']) ? trim($_POST['date_to']) : '';
+    $accountId  = isset($_POST['accountId']) ? trim($_POST['accountId']) : '';
+    $toAccount2 = isset($_POST['toAccount']) ? trim($_POST['toAccount']) : '';
+    $profit_min = isset($_POST['profit_min']) ? trim($_POST['profit_min']) : '';
+    $profit_max = isset($_POST['profit_max']) ? trim($_POST['profit_max']) : '';
+    $confirmed  = isset($_POST['confirmed']) ? trim($_POST['confirmed']) : '';
+    $search_q   = isset($_POST['query']) ? trim($_POST['query']) : '';
 
-    $date_from  = $filters['date_from'] ?? '';
-    $date_to    = $filters['date_to'] ?? '';
-    $accountId  = $filters['accountId'] ?? '';   // orders.accountId
-    $toAccount2 = $filters['toAccount'] ?? '';   // orders.toAccount
-    $profit_min = $filters['profit_min'] ?? '';
-    $profit_max = $filters['profit_max'] ?? '';
-
-    // date range (orders.created is datetime)
-    if (!empty($date_from) && !empty($date_to)) {
-      $df = mysqli_real_escape_string($db, $date_from);
-      $dt = mysqli_real_escape_string($db, $date_to);
-      $query .= " AND DATE(created) BETWEEN '$df' AND '$dt'";
-    } else if (!empty($date_from)) {
+    if ($date_from !== '') {
       $df = mysqli_real_escape_string($db, $date_from);
       $query .= " AND DATE(created) >= '$df'";
-    } else if (!empty($date_to)) {
+    }
+
+    if ($date_to !== '') {
       $dt = mysqli_real_escape_string($db, $date_to);
       $query .= " AND DATE(created) <= '$dt'";
     }
 
-    // accountId exact (numeric)
-    if ($accountId !== '' && is_numeric($accountId)) {
-      $aid = (int)$accountId;
-      $query .= " AND accountId = $aid";
+    if ($accountId !== '') {
+      $aid = mysqli_real_escape_string($db, $accountId);
+      $query .= " AND accountId = '$aid'";
     }
 
-    // toAccount exact (string)
-    if (!empty($toAccount2)) {
+    if ($toAccount2 !== '') {
       $ta = mysqli_real_escape_string($db, $toAccount2);
       $query .= " AND toAccount = '$ta'";
     }
 
-    // Profit filter (calculated)
-    // profit = totalAmount - totalCost
-    // totalAmount: payments where category='Sığorta ödənişləri' AND fromAccount not accounts AND toAccount!='Özü ödədi' etc.
-    // totalCost: payments where category!='Sığorta ödənişləri'
+    if ($confirmed === 'not') {
+      $query .= " AND confirmed = 0";
+    } else if ($confirmed === 'yes') {
+      $query .= " AND confirmed != 0";
+    }
+
     $profit_min_num = ($profit_min !== '' && is_numeric($profit_min)) ? (float)$profit_min : null;
     $profit_max_num = ($profit_max !== '' && is_numeric($profit_max)) ? (float)$profit_max : null;
 
     if ($profit_min_num !== null || $profit_max_num !== null) {
       $min = ($profit_min_num !== null) ? $profit_min_num : -999999999;
-      $max = ($profit_max_num !== null) ? $profit_max_num :  999999999;
+      $max = ($profit_max_num !== null) ? $profit_max_num : 999999999;
 
-      // ВАЖНО: тут используем вложенные SELECT по каждому orders.id
       $query .= " AND (
-    (
-      COALESCE((
-        SELECT SUM(p1.amount)
-        FROM payments p1
-        WHERE p1.deletedby = 0
-          AND p1.teslimId = orders.id
-          AND p1.fromAccount != 'Özü ödədi'
-          AND p1.fromAccount NOT IN (SELECT title FROM finaccounts)
-          AND p1.category = 'Sığorta ödənişləri'
-          AND p1.toAccount != 'Özü ödədi'
-      ), 0)
-      -
-      COALESCE((
-        SELECT SUM(p2.amount)
-        FROM payments p2
-        WHERE p2.deletedby = 0
-          AND p2.teslimId = orders.id
-          AND (p2.category != 'Sığorta ödənişləri')
-      ), 0)
-    ) BETWEEN $min AND $max
-  )";
+      (
+        COALESCE((
+          SELECT SUM(p1.amount)
+          FROM payments p1
+          WHERE p1.deletedby = 0
+            AND p1.teslimId = orders.id
+            AND p1.fromAccount != 'Özü ödədi'
+            AND p1.fromAccount NOT IN (SELECT title FROM finaccounts)
+            AND p1.category = 'Sığorta ödənişləri'
+            AND p1.toAccount != 'Özü ödədi'
+        ), 0)
+        -
+        COALESCE((
+          SELECT SUM(p2.amount)
+          FROM payments p2
+          WHERE p2.deletedby = 0
+            AND p2.teslimId = orders.id
+            AND p2.category != 'Sığorta ödənişləri'
+        ), 0)
+      ) BETWEEN $min AND $max
+    )";
     }
 
-    if ($_POST['confirmed'] != '') {
-      if ($_POST['confirmed'] == 'not') {
-        $query .= ' AND confirmed = 0';
-      } else if ($_POST['confirmed'] == 'yes') {
-        $query .= ' AND confirmed != 0';
-      }
+    if ($search_q !== '') {
+      $sq = mysqli_real_escape_string($db, $search_q);
+      $query .= " AND (
+      id LIKE '%$sq%'
+      OR created LIKE '%$sq%'
+      OR accountId LIKE '%$sq%'
+      OR toAccount LIKE '%$sq%'
+      OR note LIKE '%$sq%'
+    )";
     }
-    if ($_POST['query'] != '') {
-      $query .= ' AND ( id = "' . str_replace(' ', '%', $_POST['query']) . '" ';
-      $query .= ' OR created LIKE "%' . str_replace(' ', '%', $_POST['query']) . '%"';
-      $query .= ' )';
-    }
-    $query .= ' ORDER BY id DESC';
+
+    $query .= " ORDER BY id DESC";
   } else if ($_GET['type'] == 11) { // current
     $query_alltotal = 'SELECT id FROM call_status';
     $query = "SELECT * FROM call_status WHERE deletedby = 0 AND type IN (SELECT id FROM paramitems WHERE code = 'success') AND write_date <= DATE_SUB(DATE(DATE_Add(NOW(), INTERVAL 10 DAY)), INTERVAL 1 YEAR)";
@@ -495,20 +489,15 @@ AND toAccount='Özü ödədi'
   }
 ?>
 <?php
-  //end dynamic
   $filter_query = $query . ' LIMIT ' . $start . ', ' . $limit . '';
   $statement = $connect->prepare($query);
   $statement->execute();
   $total_data = $statement->rowCount();
-  //$statement = $connect->prepare($query_alltotal);
-  //$statement->execute();
-  //$all_total = $statement->rowCount();
   $statement = $connect->prepare($filter_query);
   $statement->execute();
   $result = $statement->fetchAll();
   $total_filter_data = $statement->rowCount();
   $fetchMethod = 'DB FETCH OTHER';
-  //start dynamic
 ?>
 <?php
   $output = '<table id="dynamic_content" class="table table-hover">';
@@ -1583,7 +1572,6 @@ AND toAccount='Özü ödədi'
 <?php
 
   //end dynamic
-
   $total_data = $total_data - $break;
   $all_total = $all_total - $break;
 
@@ -1595,17 +1583,11 @@ AND toAccount='Özü ödədi'
   </tr>
   ';
   }
-
   $output .= '
   </tbody>
   </table>
-
   <br />';
-
   if ($_POST['short'] != 1 && $_POST['showType'] != "report") {
-
-    // pagination start
-
     $end = $start + $limit;
     if ($limit == 9999999999999) {
       $output .= '<div class="row row-xs printno" style="margin: 0;"><div class="col-6"><label>' . lang('Toplam') . ': ' . $total_data . '</label></div>';
@@ -1617,12 +1599,10 @@ AND toAccount='Özü ödədi'
     <div class="col-6 printno">
       <ul class="pagination" style="float: right;">
     ';
-
     $total_links = ceil($total_data / $limit);
     $previous_link = '';
     $next_link = '';
     $page_link = '';
-
     if ($total_links > 4) {
       if ($page < 5) {
         for ($count = 1; $count <= 5; $count++) {
@@ -1653,11 +1633,9 @@ AND toAccount='Özü ödədi'
         $page_array[] = $count;
       }
     }
-
     if (empty($page_array)) {
       $page_array = [1];
     }
-
     for ($count = 0; $count < count($page_array); $count++) {
       if ($page == $page_array[$count]) {
         $page_link .= '
@@ -1665,7 +1643,6 @@ AND toAccount='Özü ödədi'
           <a class="page-link active btn btn-primary" href="#">' . $page_array[$count] . ' <span class="sr-only">(current)</span></a>
         </li>
         ';
-
         $previous_id = $page_array[$count] - 1;
         if ($previous_id > 0) {
           $previous_link = '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page_number="' . $previous_id . '">' . lang('Əvvəlki') . '</a></li>';
@@ -1708,11 +1685,7 @@ AND toAccount='Özü ödədi'
     </div>
     </div>
     ';
-
-    // pagination end
-
   }
-
   if ($_GET['type'] == 1 || $_GET['type'] == 3 || $_GET['type'] == 6 || $_GET['type'] == 7) {
     echo $output_grid;
   } else {
