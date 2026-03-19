@@ -88,7 +88,7 @@ $finTitle = $getFinAccount['title'];
                             <th scope="col">#</th>
                             <th scope="col">ID</th>
                             <th scope="col"><input type="checkbox" id="checkMedaxil" name="checkMedaxil"
-                                    value="checkMedaxil" /> DQN</th>
+                                    value="checkMedaxil" /> Hardan</th>
                             <th scope="col">Şəhadətnamə nömrəsi</th>
                             <th scope="col">Kart</th>
                             <th scope="col">Məbləğ</th>
