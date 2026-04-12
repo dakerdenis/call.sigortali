@@ -1,5 +1,5 @@
 <?php
-
+define('BASE_URL', '/call');
 error_reporting(E_ALL);
 ini_set("display_errors", 0);
 
@@ -11,8 +11,8 @@ if(!isset($_SESSION)) {
 
 $db_hostname = "localhost";
 $db_name = "sigommsy_call";
-$db_user = "root";
-$db_password = "";
+$db_user = "callsig";
+$db_password = "CallSig_2026!";
 
 
 $db = mysqli_connect($db_hostname, $db_user, $db_password, $db_name);
@@ -28,12 +28,12 @@ mysqli_query($db, "UPDATE users SET lastseen = NOW() WHERE id = '$user_id'");
 //lang
 
     if(empty($_COOKIE['lang'])){
-        setcookie("lang", "Azərbaycanca", time() + (86400 * 30), '/');
+        setcookie("lang", "Azərbaycanca", time() + (86400 * 30), '/call/');
         $_COOKIE['lang'] = "Azərbaycanca";
     }
 
     if(!empty($_GET['lang'])){
-        setcookie("lang", $_GET['lang'], time() + (86400 * 30), '/');
+        setcookie("lang", $_GET['lang'], time() + (86400 * 30), '/call/');
         $_COOKIE['lang'] = $_GET['lang'];
     }
 

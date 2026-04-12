@@ -10,11 +10,11 @@ if ( !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_RE
             $res=mysqli_query($db, "SELECT * FROM users WHERE email = '$login' AND deletedby = 0 AND status = 1 AND groupId != 0 ");
             $data=mysqli_fetch_array($res);
             if(empty($data['email'])){
-                die(header('Location: /'));
+                die(header('Location: /call/'));
             } else {
                 $isPasswordCorrect = password_verify($password, $data['password']);
                 if ($isPasswordCorrect != 1) {
-                    die(header('Location: /'));
+                    die(header('Location: /call/'));
                 } else {
                     ini_set('session.gc_maxlifetime', 18000);
                     session_set_cookie_params(18000);
@@ -26,6 +26,6 @@ if ( !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_RE
             }
         }
 } else{
-    die( header("location: /"));
+    die( header("location: /call/"));
 }
 ?>

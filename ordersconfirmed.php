@@ -18,7 +18,7 @@
                 </button>
             <? } ?>
 
-            <a href="/orders" class="btn btn-outline-primary">
+            <a href="/call/orders" class="btn btn-outline-primary">
                 <i class="fa fa-clock-o me-1"></i> <?= lang('Təsdiq gözləyənlər'); ?>
             </a>
 
@@ -324,7 +324,7 @@
 
         $.ajax({
 
-            url: "/index.php?action=fetch&type=10",
+            url: "/call/index.php?action=fetch&type=10",
             method: "POST",
 
             data: {

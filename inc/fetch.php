@@ -1428,7 +1428,7 @@ AND toAccount='Özü ödədi'
                   <td class="editable-' . $row['id'] . '" data-column="note">' . $row['note'] . '</td>
                   <td>' . $confirmedBadge . '</td>
                   <td>
-                    <a href="/orderitems/' . $row['id'] . '" class="btn btn-primary" title="' . lang("Bax") . '">
+                    <a href="/call/orderitems/' . $row['id'] . '" class="btn btn-primary" title="' . lang("Bax") . '">
                       <i class="fa fa-eye" aria-hidden="true"></i>
                     </a>
                     ' . (($userGroup == 1 && $row['confirmed'] == 0) ? '

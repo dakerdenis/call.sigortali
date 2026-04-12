@@ -376,7 +376,7 @@ AND deletedby = 0 ";
         e.preventDefault();
         $.ajax({
             type: 'POST',
-            url: "/index.php?action=add&type=10",
+            url: "/call/index.php?action=add&type=10",
             data: new FormData(this),
             contentType: false,
             cache: false,

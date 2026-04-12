@@ -162,7 +162,7 @@
           JSON.stringify(obj);
 
           $.ajax({
-              url: "/index.php?action=add&type=1&module_name="+module_name,
+              url: "/call/index.php?action=add&type=1&module_name="+module_name,
               method: "POST",
               data: obj,
               beforeSend: function() {
@@ -199,7 +199,7 @@
         var module_name = $(this).attr("module");
         
         $.ajax({
-            url: "/index.php?action=add&type=11",
+            url: "/call/index.php?action=add&type=11",
             method: "POST",
             data: {
                 itemId: itemId,
@@ -232,7 +232,7 @@
             }
 
             $.ajax({
-                url: "/index.php?action=add&type=12",
+                url: "/call/index.php?action=add&type=12",
                 method: "POST",
                 data: {
                     itemId: itemId,
@@ -263,7 +263,7 @@
         if (confirm('<?= lang("Silmək istədiyinizdən əminsiniz ?"); ?>')) {
         
           $.ajax({
-              url: "/index.php?action=add&type=2",
+              url: "/call/index.php?action=add&type=2",
               method: "POST",
               data: {
                 itemId: itemId,

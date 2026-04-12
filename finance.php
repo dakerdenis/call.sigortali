@@ -29,7 +29,7 @@
                             <div class="col-lg-6 grid-margin stretch-card">
                                 <button type="button" id="exportToExcel" data-id=".customersTable" class="btn btn-primary"><i class="fa fa-file-excel-o"></i></button>
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target=".modalAddPayment"><?= lang('Ödəniş Et'); ?></button>
-                                <a href="/orders" class="btn btn-primary"><?= lang('Ödəniş Hesabatları'); ?></a>
+                                <a href="/call/orders" class="btn btn-primary"><?= lang('Ödəniş Hesabatları'); ?></a>
                             </div>
             </div>
 
@@ -222,7 +222,7 @@
             opacity: 0.5
         });
         $.ajax({
-            url: "/index.php?action=fetch&type=8",
+            url: "/call/index.php?action=fetch&type=8",
             method: "POST",
             data: {
                 page: page,
@@ -245,7 +245,7 @@
             opacity: 0.5
         });
         $.ajax({
-            url: "/index.php?action=fetch&type=7",
+            url: "/call/index.php?action=fetch&type=7",
             method: "POST",
             data: {
                 page: page,
@@ -282,7 +282,7 @@
 
         $.ajax({
             type: 'POST',
-            url: "/index.php?action=add&type=8",
+            url: "/call/index.php?action=add&type=8",
             data: new FormData(this),
                 contentType: false,
                 cache: false,

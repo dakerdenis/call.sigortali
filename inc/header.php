@@ -3,7 +3,7 @@
 <html>
 
 <head>
-
+<base href="/call/">
     <title>CallCenter Studio</title>
     <link rel="icon" type="image/x-icon" href="/assets/favicon.png" />
 
@@ -87,34 +87,34 @@
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
             <polyline points="9 22 9 12 15 12 15 22" /></svg>
         </a>
-        <a href="/current" class="app-sidebar-link <? if($_GET['action'] == 'current'){ echo 'active'; } ?>">
+        <a href="/call/current" class="app-sidebar-link <? if($_GET['action'] == 'current'){ echo 'active'; } ?>">
           <i class="fa fa-handshake-o" aria-hidden="true"></i>
         </a>
-        <a href="/customers" class="app-sidebar-link <? if($_GET['action'] == 'customers'){ echo 'active'; } ?>">
+        <a href="/call/customers" class="app-sidebar-link <? if($_GET['action'] == 'customers'){ echo 'active'; } ?>">
           <i class="fa fa-user-o" aria-hidden="true"></i>
         </a>
-        <a href="/companies" class="app-sidebar-link <? if($_GET['action'] == 'companies'){ echo 'active'; } ?>">
+        <a href="/call/companies" class="app-sidebar-link <? if($_GET['action'] == 'companies'){ echo 'active'; } ?>">
           <i class="fa fa-building" aria-hidden="true"></i>
         </a>
-        <a href="/statuses" class="app-sidebar-link <? if($_GET['action'] == 'statuses'){ echo 'active'; } ?>">
+        <a href="/call/statuses" class="app-sidebar-link <? if($_GET['action'] == 'statuses'){ echo 'active'; } ?>">
           <i class="fa fa-check" aria-hidden="true"></i>
         </a>
-        <a href="/accounting" class="app-sidebar-link <? if($_GET['action'] == 'accounting'){ echo 'active'; } ?>">
+        <a href="/call/accounting" class="app-sidebar-link <? if($_GET['action'] == 'accounting'){ echo 'active'; } ?>">
           <svg class="link-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="feather feather-pie-chart" viewBox="0 0 24 24">
             <defs />
             <path d="M21.21 15.89A10 10 0 118 2.83M22 12A10 10 0 0012 2v10z" />
           </svg>
         </a>
         <? if($userGroup == 1 || $userGroup == 2 || $user_id == 14){ ?>
-        <a href="/finance" class="app-sidebar-link <? if($_GET['action'] == 'finance'){ echo 'active'; } ?>">
+        <a href="/call/finance" class="app-sidebar-link <? if($_GET['action'] == 'finance'){ echo 'active'; } ?>">
           <i class="fa fa-money" aria-hidden="true"></i>
         </a>
-                <a href="/finance2" class="app-sidebar-link <? if($_GET['action'] == 'finance2'){ echo 'active'; } ?>">
+                <a href="/call/finance2" class="app-sidebar-link <? if($_GET['action'] == 'finance2'){ echo 'active'; } ?>">
           <i class="fa fa-money" aria-hidden="true"></i>
         </a>
         <? } ?>
         <? if($userGroup == 1 || $userGroup == 2){ ?>
-        <a href="/settings" class="app-sidebar-link <? if($_GET['action'] == 'settings'){ echo 'active'; } ?>">
+        <a href="/call/settings" class="app-sidebar-link <? if($_GET['action'] == 'settings'){ echo 'active'; } ?>">
           <svg class="link-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="feather feather-settings" viewBox="0 0 24 24">
             <defs />
             <circle cx="12" cy="12" r="3" />

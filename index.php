@@ -87,7 +87,7 @@
         var data = $("#login-form").serialize();
         $.ajax({
             type: 'POST',
-            url: '/inc/login.php',
+            url: '/call/inc/login.php',
             data: data,
             beforeSend: function() {
                 $("#error").fadeOut();
@@ -96,7 +96,7 @@
             success: function(response) {
                 if ($.trim(response) === "1") {
                     $("#login").val('Doğru..');
-                    setTimeout(' window.location.href = "/"; ', 0);
+                    setTimeout(' window.location.href = "/call/"; ', 0);
                 } else if ($.trim(response) === "2") {
                     $("#seckey").prop("disabled", false);
                     $('#authentnew').show();
@@ -186,7 +186,7 @@
         ob_end_flush();
 
     } else{
-        die( header("location: inc/logout.php"));
+        die( header("location: /call/inc/logout.php"));
     }
 
 }

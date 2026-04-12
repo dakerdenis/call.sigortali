@@ -13,7 +13,7 @@
                 </button>
             <? } ?>
 
-            <a href="/ordersconfirmed" class="btn btn-outline-primary">
+            <a href="/call/ordersconfirmed" class="btn btn-outline-primary">
                 <i class="fa fa-check-circle me-1"></i> <?= lang('Təsdiqlənənlər'); ?>
             </a>
         </div>
@@ -45,7 +45,7 @@
                     }
                     echo '
                     <div class="col-auto">
-                    <a href="/addorder/' . $row['id'] . '" class="btn btn-primary">
+                    <a href="/call/addorder/' . $row['id'] . '" class="btn btn-primary">
                     ' . $row['title'] . ' ' . $balance . '
                     </a>
                     </div>
@@ -278,7 +278,7 @@ function load_data(page, query = '', limit = '', filters = {}, params = '') {
     $("#dynamic_content").css({ opacity: 0.5 });
 
     $.ajax({
-        url: "/index.php?action=fetch&type=10",
+        url: "/call/index.php?action=fetch&type=10",
         type: "POST",
         cache: false,
         data: {

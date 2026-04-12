@@ -11,6 +11,6 @@ setcookie("id", "", time()-3600,"/");
 $_SESSION = array();
 session_destroy();
 
-header("location: /");
+header("location: /call/");
 
 ?>

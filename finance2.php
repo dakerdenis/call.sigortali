@@ -18,7 +18,7 @@
         <i class="fa fa-plus me-1"></i> <?= lang('Ödəniş Et'); ?>
       </button>
 
-      <a href="/orders" class="btn btn-outline-primary">
+      <a href="/call/orders" class="btn btn-outline-primary">
         <i class="fa fa-list-alt me-1"></i> <?= lang('Ödəniş Hesabatları'); ?>
       </a>
     </div>
@@ -290,7 +290,7 @@ function load_data_payments(page, query = '', account = '' , category = '', limi
     $("#dynamic_content_payments").css({ opacity: 0.5 });
 
     $.ajax({
-        url: "/index.php?action=fetch&type=8",
+        url: "/call/index.php?action=fetch&type=8",
         method: "POST",
         data: {
             page: page,
@@ -320,7 +320,7 @@ function load_data_payments(page, query = '', account = '' , category = '', limi
                 opacity: 0.5
             });
             $.ajax({
-                url: "/index.php?action=fetch&type=7",
+                url: "/call/index.php?action=fetch&type=7",
                 method: "POST",
                 data: {
                     page: page,
@@ -357,7 +357,7 @@ function load_data_payments(page, query = '', account = '' , category = '', limi
 
             $.ajax({
                 type: 'POST',
-                url: "/index.php?action=add&type=8",
+                url: "/call/index.php?action=add&type=8",
                 data: new FormData(this),
                 contentType: false,
                 cache: false,

@@ -112,7 +112,7 @@
 
         $.ajax({
 
-            url: "/index.php?action=fetch&type=2",
+            url: "/call/index.php?action=fetch&type=2",
 
             method: "POST",
 

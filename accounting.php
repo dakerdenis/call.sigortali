@@ -179,7 +179,7 @@
             opacity: 0.5
         });
         $.ajax({
-            url: "/index.php?action=fetch&type=5",
+            url: "/call/index.php?action=fetch&type=5",
             method: "POST",
             data: {
                 page: page,

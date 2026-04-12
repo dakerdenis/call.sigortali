@@ -274,7 +274,7 @@
             opacity: 0.5
         });
         $.ajax({
-            url: "/index.php?action=fetch&type=4",
+            url: "/call/index.php?action=fetch&type=4",
             method: "POST",
             data: {
                 page: page,
@@ -306,7 +306,7 @@
 
       $.ajax({
           type: 'POST',
-          url: "/index.php?action=add&type=6",
+          url: "/call/index.php?action=add&type=6",
           data: new FormData(this),
             contentType: false,
             cache: false,
@@ -333,7 +333,7 @@
 
       $.ajax({
           type: 'POST',
-          url: "/index.php?action=add&type=13",
+          url: "/call/index.php?action=add&type=13",
           data: new FormData(this),
             contentType: false,
             cache: false,

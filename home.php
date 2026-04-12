@@ -724,7 +724,7 @@
 
         $.ajax({
           type: 'POST',
-          url: "/index.php?action=add",
+          url: "/call/index.php?action=add",
           data: new FormData(this),
           contentType: false,
           cache: false,
@@ -736,7 +736,7 @@
           success: function(response) {
             //console.log(response);
             //location.reload();
-            $(location).attr('href', '/');
+            $(location).attr('href', '/call/');
           }
         });
         return false;
@@ -769,7 +769,7 @@
 
       $.ajax({
         type: 'POST',
-        url: "/index.php?action=add&type=3",
+        url: "/call/index.php?action=add&type=3",
         data: new FormData(this),
         contentType: false,
         cache: false,
@@ -796,7 +796,7 @@
 
       $.ajax({
         type: 'POST',
-        url: "/index.php?action=add&type=8",
+        url: "/call/index.php?action=add&type=8",
         data: new FormData(this),
         contentType: false,
         cache: false,
@@ -824,7 +824,7 @@
         opacity: 0.5
       });
       $.ajax({
-        url: "/index.php?action=fetch&type=1",
+        url: "/call/index.php?action=fetch&type=1",
         method: "POST",
         data: {
           page: page,
@@ -850,7 +850,7 @@
 
       $.ajax({
         type: 'POST',
-        url: '/index.php?action=data&type=1',
+        url: '/call/index.php?action=data&type=1',
         data: {
           car_id: car_id,
           car_pin: car_pin
