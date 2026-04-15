@@ -77,23 +77,27 @@ if (isset($_SESSION['login']) && isset($_SESSION['id'])) {
       }
       $query .= ' ORDER BY RAND()';
     }
-  } else if ($_GET['type'] == 2) { // customers table
+} else if ($_GET['type'] == 2) { // customers table
     $query_alltotal = 'SELECT id FROM customers';
     $query = "SELECT *  FROM customers WHERE 1=1";
     if ($userGroup == 3) {
       $query .= " AND createdby = '$user_id' AND end_date > now() + INTERVAL 29 day AND end_date < now() + INTERVAL 31 day AND car_id NOT IN (SELECT car_id FROM call_status WHERE year(created) = year(curdate()))";
     }
     if ($_POST['query'] != '') {
-      $query .= ' AND ( id = "' . str_replace(' ', '%', $_POST['query']) . '" ';
-      $query .= ' OR car_id LIKE "%' . str_replace(' ', '%', $_POST['query']) . '%"';
-      $query .= ' OR car_pin LIKE "%' . str_replace(' ', '%', $_POST['query']) . '%"';
-      $query .= ' OR name LIKE "%' . str_replace(' ', '%', $_POST['query']) . '%"';
-      $query .= ' OR pin LIKE "%' . str_replace(' ', '%', $_POST['query']) . '%"';
-      $query .= ' OR identification LIKE "%' . str_replace(' ', '%', $_POST['query']) . '%"';
-      $query .= ' OR phone LIKE "%' . str_replace(' ', '%', $_POST['query']) . '%"';
-      $query .= ' )';
+      $q = mysqli_real_escape_string($db, $_POST['query']);
+      $query .= " AND ( id = '$q' ";
+      $query .= " OR car_id LIKE '%$q%' ";
+      $query .= " OR car_pin LIKE '%$q%' ";
+      $query .= " OR name LIKE '%$q%' ";
+      $query .= " OR pin LIKE '%$q%' ";
+      $query .= " OR identification LIKE '%$q%' ";
+      $query .= " OR phone LIKE '%$q%' ";
+      $query .= " )";
     }
-    $query .= ' ORDER BY end_date ASC';
+
+    // Сортировка по end_date
+    $sortDir = (isset($_POST['sort']) && $_POST['sort'] === 'desc') ? 'DESC' : 'ASC';
+    $query .= " ORDER BY end_date $sortDir";
   } else if ($_GET['type'] == 22) { // companies table
     $query_alltotal = 'SELECT id FROM customers';
     $query = "SELECT * FROM customers WHERE LENGTH(pin)=10 AND pin REGEXP '^[0-9]+$'";
@@ -385,9 +389,9 @@ AND toAccount='Özü ödədi'
     if ($_POST['params'] != '') {
       $query .= ' ';
     }
-    if ($userGroup == 3) {
-      $query .= " AND agreeUser = '$user_id' ";
-    }
+ //   if ($userGroup == 3) {
+   //   $query .= " AND agreeUser = '$user_id' ";
+   // }
     $query .= ' ORDER BY id DESC';
   } else if ($_GET['type'] == 10) { // orders
     $query_alltotal = 'SELECT id FROM orders';
@@ -471,32 +475,52 @@ AND toAccount='Özü ödədi'
     }
 
     $query .= " ORDER BY id DESC";
-  } else if ($_GET['type'] == 11) { // current
+} else if ($_GET['type'] == 11) { // current
     $query_alltotal = 'SELECT id FROM call_status';
     $query = "SELECT * FROM call_status WHERE deletedby = 0 AND type IN (SELECT id FROM paramitems WHERE code = 'success') AND write_date <= DATE_SUB(DATE(DATE_Add(NOW(), INTERVAL 10 DAY)), INTERVAL 1 YEAR)";
+
+    // Поиск по DQN, шəhadətnamə, ID
     if ($_POST['query'] != '') {
-      $query .= ' AND ( id = "' . str_replace(' ', '%', $_POST['query']) . '" ';
-      $query .= ' OR car_id LIKE "%' . str_replace(' ', '%', $_POST['query']) . '%"';
-      $query .= ' )';
+      $q = mysqli_real_escape_string($db, $_POST['query']);
+      $query .= " AND ( id = '$q' ";
+      $query .= " OR car_id LIKE '%$q%' ";
+      $query .= " OR identification LIKE '%$q%' ";
+      $query .= " OR car_id IN (SELECT car_id FROM customers WHERE name LIKE '%$q%') ";
+      $query .= " )";
     }
-    if ($_POST['params'] != '') {
-      $query .= ' ';
+
+    // Фильтр по страховой компании
+    if (!empty($_POST['company'])) {
+      $companyFilter = (int)$_POST['company'];
+      $query .= " AND companyId = $companyFilter";
     }
+
     if ($userGroup == 3) {
       $query .= " AND agreeUser = '$user_id' ";
     }
-    $query .= ' ORDER BY id DESC';
+
+    // Сортировка по дате (write_date)
+    $sortDir = (isset($_POST['sort']) && $_POST['sort'] === 'asc') ? 'ASC' : 'DESC';
+    $query .= " ORDER BY write_date $sortDir, id $sortDir";
   }
 ?>
 <?php
   $filter_query = $query . ' LIMIT ' . $start . ', ' . $limit . '';
-  $statement = $connect->prepare($query);
+
+  // Быстрый подсчёт через COUNT(*) вместо тащить все строки
+  $count_query = preg_replace('/^SELECT\s+.*?\s+FROM/is', 'SELECT COUNT(*) as cnt FROM', $query, 1);
+  // Убираем ORDER BY из COUNT-запроса — он не нужен и замедляет
+  $count_query = preg_replace('/\s+ORDER\s+BY\s+.*$/is', '', $count_query);
+
+  $statement = $connect->prepare($count_query);
   $statement->execute();
-  $total_data = $statement->rowCount();
+  $countRow = $statement->fetch(PDO::FETCH_ASSOC);
+  $total_data = (int)$countRow['cnt'];
+
   $statement = $connect->prepare($filter_query);
   $statement->execute();
   $result = $statement->fetchAll();
-  $total_filter_data = $statement->rowCount();
+  $total_filter_data = count($result);
   $fetchMethod = 'DB FETCH OTHER';
 ?>
 <?php
@@ -934,64 +958,108 @@ AND toAccount='Özü ödədi'
   } else if ($_GET['type'] == 4) { // users table
 
     $output .= '
-    <thead>
+    <thead class="table-light">
       <tr>
-        <th>#</th>
-        <th>' . lang('Ad') . '</th>
-        <th>' . lang('Soyad') . '</th>
+        <th style="width:60px;">#</th>
+        <th style="width:60px;"></th>
+        <th>' . lang('Ad Soyad') . '</th>
         <th>' . lang('İstifadəçi adı') . '</th>
-        <th>' . lang('Şifrə') . '</th>
+        <th>' . lang('Rol') . '</th>
         <th>' . lang('Status') . '</th>
-        <th></th>
+        <th>' . lang('Son giriş') . '</th>
+        <th style="width:180px;text-align:right;">' . lang('Əməliyyatlar') . '</th>
       </tr>
-      </thead>
-        <tbody>
+    </thead>
+    <tbody>
     ';
 
     foreach ($result as $row) {
 
+      // ===== Status badge =====
       if ($row['status'] == 0) {
-        $status = 'Passiv';
-        $datastatus = "1";
-        $datastatusTitle = "Aktiv Et";
-        $datastatusIcon = "unlock-alt";
-      } else if ($row['status'] == 1) {
-        $status = 'Aktiv';
-        $datastatus = "0";
-        $datastatusTitle = "Passiv Et";
-        $datastatusIcon = "lock";
+        $statusBadge      = '<span class="badge bg-secondary"><i class="fa fa-circle-o"></i> Passiv</span>';
+        $datastatus       = "1";
+        $datastatusTitle  = "Aktiv et";
+        $datastatusIcon   = "unlock-alt";
+        $datastatusBtnCls = "btn-outline-success";
+      } else {
+        $statusBadge      = '<span class="badge bg-success"><i class="fa fa-check-circle"></i> Aktiv</span>';
+        $datastatus       = "0";
+        $datastatusTitle  = "Passiv et";
+        $datastatusIcon   = "lock";
+        $datastatusBtnCls = "btn-outline-warning";
       }
 
-      $output .= '
-              <tr id="data-' . $row['id'] . '" class="forProgress">
-              
-                <td>' . $row['id'] . '</td>
-                <td class="editable-' . $row['id'] . '" data-column="name">' . $row['name'] . '</td>
-                <td class="editable-' . $row['id'] . '" data-column="surname">' . $row['surname'] . '</td>
-                <td class="editable-' . $row['id'] . '" data-column="email">' . $row['email'] . '</td>
-                <td class="editable-' . $row['id'] . '" data-column="password">*******</td>
-                <td class="statusLabel-' . $row['id'] . '">' . $status . '</td>
-                <td>
-                  <div class="btn-group" role="group" aria-label="Basic example">
-                        <button id="' . $row['id'] . '" data-status="' . $datastatus . '" module="users" type="button" class="status status-' . $row['id'] . ' btn btn-primary" title="' . $datastatusTitle . '">
-                              <i class="fa fa-' . $datastatusIcon . '"></i>
-                            </button>
-                          <button style="display: none;" id="' . $row['id'] . '" module="users" type="button" class="inlineSaveButton inlineSave-' . $row['id'] . ' btn btn-primary" title="' . lang("Yadda Saxla") . '">
-                            <i class="fa fa-check" aria-hidden="true"></i>
-                          </button>
-                          <button id="' . $row['id'] . '" type="button" class="inlineEditButton inlineEdit-' . $row['id'] . ' btn btn-primary" title="' . lang("Düzəliş et") . '">
-                            <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                          </button>
-                          <button id="' . $row['id'] . '" type="button" module="users" class="delete delete-' . $row['id'] . ' btn btn-primary" title="Sil">
-                            <i class="fa fa-trash" aria-hidden="true"></i>
-                          </button>
-                    </div>
-                </td>
-      ';
+      // ===== Rol badge =====
+      if ($row['groupId'] == 1) {
+        $roleBadge = '<span class="badge bg-danger"><i class="fa fa-shield"></i> Admin</span>';
+      } else if ($row['groupId'] == 2) {
+        $roleBadge = '<span class="badge bg-primary"><i class="fa fa-user-circle"></i> Menecer</span>';
+      } else if ($row['groupId'] == 3) {
+        $roleBadge = '<span class="badge bg-info text-dark"><i class="fa fa-headphones"></i> Operator</span>';
+      } else {
+        $roleBadge = '<span class="badge bg-light text-dark">—</span>';
+      }
 
-      $output .= '</tr>';
-    }
-  } else if ($_GET['type'] == 5) { // accounting
+      // ===== Avatar =====
+      $initials = strtoupper(mb_substr($row['name'], 0, 1) . mb_substr($row['surname'], 0, 1));
+      $avatarColors = ['#4e73df','#1cc88a','#36b9cc','#f6c23e','#e74a3b','#858796','#6f42c1','#fd7e14'];
+      $avatarBg = $avatarColors[$row['id'] % count($avatarColors)];
+      $avatar = '<div style="width:38px;height:38px;border-radius:50%;background:' . $avatarBg . ';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;">' . $initials . '</div>';
+
+      // ===== Last seen =====
+      if (!empty($row['lastseen']) && $row['lastseen'] != '0000-00-00 00:00:00') {
+        $lastseen = '<small class="text-muted"><i class="fa fa-clock-o"></i> ' . date("d.m.Y H:i", strtotime($row['lastseen'])) . '</small>';
+      } else {
+        $lastseen = '<small class="text-muted">—</small>';
+      }
+
+      // safe для data-атрибутов
+      $safeName    = htmlspecialchars($row['name'], ENT_QUOTES);
+      $safeSurname = htmlspecialchars($row['surname'], ENT_QUOTES);
+      $safeEmail   = htmlspecialchars($row['email'], ENT_QUOTES);
+
+      $output .= '
+        <tr id="data-' . $row['id'] . '" class="forProgress align-middle">
+          <td><span class="text-muted">#' . $row['id'] . '</span></td>
+          <td> </td>
+          <td>
+            <div style="font-weight:600;">' . $row['name'] . '</div>
+            <div class="text-muted" style="font-size:12px;">' . $row['surname'] . '</div>
+          </td>
+          <td><i class="fa fa-user-o text-muted"></i> ' . $row['email'] . '</td>
+          <td>' . $roleBadge . '</td>
+          <td class="statusLabel-' . $row['id'] . '">' . $statusBadge . '</td>
+          <td>' . $lastseen . '</td>
+          <td style="text-align:right;">
+
+<div class="btn-group" role="group">
+              <button type="button"
+                      class="btn btn-outline-primary openEditUser"
+                      data-id="' . $row['id'] . '"
+                      data-name="' . $safeName . '"
+                      data-surname="' . $safeSurname . '"
+                      data-email="' . $safeEmail . '"
+                      data-group="' . $row['groupId'] . '"
+                      data-active="' . $row['status'] . '"
+                      title="' . lang("Düzəliş et") . '"
+                      style="padding:8px 14px;font-size:15px;">
+                <i class="fa fa-pencil"></i>
+              </button>
+              <button type="button"
+                      class="btn btn-outline-danger openDeleteUser"
+                      data-id="' . $row['id'] . '"
+                      data-name="' . $safeName . ' ' . $safeSurname . '"
+                      title="Sil"
+                      style="padding:8px 14px;font-size:15px;">
+                <i class="fa fa-trash"></i>
+              </button>
+            </div>
+
+          </td>
+        </tr>
+      ';
+    }} else if ($_GET['type'] == 5) { // accounting
 
     $output .= '
 <thead class="table-light">
@@ -1332,16 +1400,14 @@ AND toAccount='Özü ödədi'
                   <td>' . $getCreated['name'] . ' ' . $getCreated['surname'] . '</td>
                   <td>' . $row['created'] . '</td>
                   <td class="editable-' . $row['id'] . '" data-column="content">' . $row['content'] . '</td>
-                  <td>
-                    ' . (($userGroup == 1 || $userGroup == 2) ? '
+<td>
+                    ' . (($user_id == 2) ? '
                       <button style="display: none;" id="' . $row['id'] . '" module="call_status" type="button" class="inlineSaveButton inlineSave-' . $row['id'] . ' btn btn-primary" title="' . lang("Yadda Saxla") . '">
                         <i class="fa fa-check" aria-hidden="true"></i>
                       </button>
                       <button id="' . $row['id'] . '" type="button" class="inlineEditButton inlineEdit-' . $row['id'] . ' btn btn-primary" title="' . lang("Düzəliş et") . '">
                         <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                       </button>
-                    ' : "") . '
-                    ' . (($userGroup == 1 || $userGroup == 2) ? '
                       <button id="' . $row['id'] . '" type="button" module="call_status" class="delete delete-' . $row['id'] . ' btn btn-primary" title="Sil">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                       </button>

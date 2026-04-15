@@ -82,8 +82,8 @@
 </html>
 
 <script>
-    $('#login').click(function() {
-
+$('#login-form').on('submit', function(e) {
+        e.preventDefault();
         var data = $("#login-form").serialize();
         $.ajax({
             type: 'POST',

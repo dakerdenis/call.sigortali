@@ -3,23 +3,36 @@ error_reporting(E_ALL);
 ini_set("display_errors", 0);
 if (isset($_SESSION['login']) && isset($_SESSION['id'])) {
     if ($_GET['type'] == 1) { // inline update
-        $rejectIt = array("id", "itemId", "deletedby");
+        $rejectIt = array("id", "itemId", "deletedby", "module_name");
         $itemId = htmlspecialchars(trim($_POST['itemId']));
         $module_name = $_GET['module_name'];
+        if (empty($module_name)) {
+            $module_name = $_POST['module_name'];
+        }
+        $response = 0;
         foreach ($_POST as $key => $value) {
+            if (in_array($key, $rejectIt)) {
+                continue;
+            }
+            // Поле status может быть '0' — это валидное значение, нельзя пропускать
+            if ($key !== 'status' && $value === '') {
+                continue;
+            }
             if (DateTime::createFromFormat('d.m.Y', $value) !== false) {
                 $value = date("Y-m-d", strtotime($value));
             }
             if ($key == 'password') {
+                if ($value === '') {
+                    continue; // пустой пароль не сохраняем
+                }
                 $value = password_hash($value, PASSWORD_BCRYPT);
             }
-            if (!in_array($key, $rejectIt) && $value != '') {
-                $sql = " UPDATE $module_name SET $key = '$value' WHERE id = '$itemId' ";
-                if (!mysqli_query($db, $sql)) {
-                    echo mysqli_error($db);
-                } else {
-                    $response = 1;
-                }
+            $value_esc = mysqli_real_escape_string($db, $value);
+            $sql = " UPDATE $module_name SET $key = '$value_esc' WHERE id = '$itemId' ";
+            if (!mysqli_query($db, $sql)) {
+                echo mysqli_error($db);
+            } else {
+                $response = 1;
             }
         }
         echo $response;

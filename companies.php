@@ -32,7 +32,7 @@
             $("#dynamic_content").css({
                 opacity: .5
             }).html(spinner());
-            $.post("/index.php?action=fetch&type=22", {
+            $.post("/call/index.php?action=fetch&type=22", {
                 page: page,
                 query: query,
                 limit: limit,

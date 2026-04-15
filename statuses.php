@@ -63,7 +63,7 @@ $(function(){
   }
   function load_data(page,query,limit,params){
     $("#dynamic_content").css({opacity:.5}).html(spinner());
-    $.post("/index.php?action=fetch&type=9",$.extend({page:page,query:query,limit:limit,params:params||""},getFilters()),function(data){
+    $.post("/call/index.php?action=fetch&type=9",$.extend({page:page,query:query,limit:limit,params:params||""},getFilters()),function(data){
       $("#dynamic_content").html(data).css({opacity:1});
     });
   }
