@@ -523,6 +523,7 @@ AND toAccount='Özü ödədi'
   $total_filter_data = count($result);
   $fetchMethod = 'DB FETCH OTHER';
 ?>
+
 <?php
   $output = '<table id="dynamic_content" class="table table-hover">';
   if ($_GET['type'] == 1) { // customers grid
@@ -857,7 +858,7 @@ AND toAccount='Özü ödədi'
               <tr id="data-' . $row['id'] . '" class="forProgress">
               
                 <td>' . $row['id'] . '</td>
-                <td class="editable-' . $row['id'] . '" data-column="name">' . $row['name'] . '</td>
+                <td class="editable-' . $row['id'] . '" data-column="name"><a href="/call/customer/' . $row['id'] . '" style="color:#4e73df;font-weight:600;text-decoration:none;">' . $row['name'] . '</a></td>
                 <td class="editable-' . $row['id'] . '" data-column="car_id"><a href="/call/' . $row['car_id'] . '">' . $row['car_id'] . '</a></td>
                 <td class="editable-' . $row['id'] . '" data-column="pin">' . $row['pin'] . '</td>
                 <td class="editable-' . $row['id'] . '" data-column="serial">' . $row['serial'] . '</td>
