@@ -11,8 +11,8 @@ if(!isset($_SESSION)) {
 
 $db_hostname = "localhost";
 $db_name = "sigommsy_call";
-$db_user = "root";
-$db_password = "";
+$db_user = "callsig";
+$db_password = "CallSig_2026!";
 
 
 $db = mysqli_connect($db_hostname, $db_user, $db_password, $db_name);

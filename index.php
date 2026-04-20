@@ -165,9 +165,6 @@ if (!isset($_SESSION['login']) || !isset($_SESSION['id']) || $_SESSION['id'] == 
       case "customers":
         include_once("customers.php");
         break;
-      case "finance":
-        include_once("finance.php");
-        break;
       case "finance2":
         include_once("finance2.php");
         break;

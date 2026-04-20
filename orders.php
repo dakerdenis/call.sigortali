@@ -1,21 +1,28 @@
 <?php include('inc/header.php'); ?>
 <div class="container-fluid py-3">
-    <!-- HEADER -->
+
+    <!-- TABS + EXPORT -->
     <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3 mb-3">
-        <div>
-            <h3 class="mb-1 fw-bold">Orders <span class="text-muted">Reports</span> - Təsdiq gözləyənlər</h3>
-            <div class="text-muted small">Ödəniş həsabatları və sifariş gəlirləri</div>
-        </div>
+
+        <ul class="nav nav-pills" style="gap:4px;">
+            <li class="nav-item">
+                <a href="/call/orders" class="nav-link active" style="font-weight:600;">
+                    <i class="fa fa-clock-o me-1"></i> Təsdiq gözləyənlər
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/call/ordersconfirmed" class="nav-link">
+                    <i class="fa fa-check-circle me-1"></i> Təsdiqlənənlər
+                </a>
+            </li>
+        </ul>
+
         <div class="d-flex flex-wrap gap-2">
             <? if ($userGroup == 1 || $userGroup == 2) { ?>
                 <button type="button" id="exportToExcel" data-id=".customersTable" class="btn btn-outline-success">
                     <i class="fa fa-file-excel-o me-1"></i> Export
                 </button>
             <? } ?>
-
-            <a href="/call/ordersconfirmed" class="btn btn-outline-primary">
-                <i class="fa fa-check-circle me-1"></i> <?= lang('Təsdiqlənənlər'); ?>
-            </a>
         </div>
     </div>
     <!-- ACCOUNTS -->

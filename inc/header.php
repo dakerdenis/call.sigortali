@@ -97,8 +97,8 @@
           </svg>
         </a>
         <? if($userGroup == 1 || $userGroup == 2 || $user_id == 14){ ?>
-        <a href="/call/finance" class="app-sidebar-link <? if($_GET['action'] == 'finance'){ echo 'active'; } ?>">
-          <i class="fa fa-money" aria-hidden="true"></i>
+        <a href="/call/orders" class="app-sidebar-link <? if($_GET['action'] == 'orders'){ echo 'active'; } ?><? if($_GET['action'] == 'ordersconfirmed'){ echo 'active'; } ?>"> 
+          <i class="fa fa-credit-card" aria-hidden="true"></i>
         </a>
                 <a href="/call/finance2" class="app-sidebar-link <? if($_GET['action'] == 'finance2'){ echo 'active'; } ?>">
           <i class="fa fa-money" aria-hidden="true"></i>

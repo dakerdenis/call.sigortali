@@ -1503,9 +1503,14 @@ AND toAccount='Özü ödədi'
                         <i class="fa fa-check" aria-hidden="true"></i>
                       </button>
                     ' : "") . '
+                                        ' . (($userGroup == 1 && $row['confirmed'] != 0) ? '
+                      <button id="' . $row['id'] . '" module="orders" type="button" class="unconfirm unconfirm-' . $row['id'] . ' btn btn-outline-warning" title="Geri çək">
+                        <i class="fa fa-undo"></i>
+                      </button>
+                    ' : "") . '
                     
-                      <button style="display: none;" id="' . $row['id'] . '" module="orders" type="button" class="inlineSaveButton inlineSave-' . $row['id'] . ' btn btn-primary" title="' . lang("Yadda Saxla") . '">
-                        <i class="fa fa-check" aria-hidden="true"></i>
+<button style="display: none;" id="' . $row['id'] . '" module="orders" type="button" class="inlineSaveButton inlineSave-' . $row['id'] . ' btn btn-info" title="' . lang("Yadda Saxla") . '">
+                        <i class="fa fa-floppy-o" aria-hidden="true"></i>
                       </button>
                       <button id="' . $row['id'] . '" type="button" class="inlineEditButton inlineEdit-' . $row['id'] . ' btn btn-primary" title="' . lang("Düzəliş et") . '">
                         <i class="fa fa-pencil-square-o" aria-hidden="true"></i>

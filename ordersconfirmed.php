@@ -1,27 +1,28 @@
 <?php include('inc/header.php'); ?>
-
 <div class="container-fluid py-3">
 
-    <!-- HEADER -->
+    <!-- TABS + EXPORT -->
     <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3 mb-3">
 
-        <div>
-            <h3 class="mb-1 fw-bold">Orders <span class="text-muted">Reports</span> - Təsdiqlənənlər</h3>
-            <div class="text-muted small">Təsdiqlənmiş sifarişlərin siyahısı</div>
-        </div>
+        <ul class="nav nav-pills" style="gap:4px;">
+            <li class="nav-item">
+                <a href="/call/orders" class="nav-link">
+                    <i class="fa fa-clock-o me-1"></i> Təsdiq gözləyənlər
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/call/ordersconfirmed" class="nav-link active" style="font-weight:600;">
+                    <i class="fa fa-check-circle me-1"></i> Təsdiqlənənlər
+                </a>
+            </li>
+        </ul>
 
         <div class="d-flex flex-wrap gap-2">
-
             <? if ($userGroup == 1 || $userGroup == 2) { ?>
                 <button type="button" id="exportToExcel" data-id=".customersTable" class="btn btn-outline-success">
                     <i class="fa fa-file-excel-o me-1"></i> Export
                 </button>
             <? } ?>
-
-            <a href="/call/orders" class="btn btn-outline-primary">
-                <i class="fa fa-clock-o me-1"></i> <?= lang('Təsdiq gözləyənlər'); ?>
-            </a>
-
         </div>
     </div>
 
@@ -373,5 +374,26 @@
 
         load_data(1, query, limit, ORDERS_FILTERS);
 
+    });
+    // === Unconfirm (Geri çək) ===
+    $(document).on('click', '.unconfirm', function() {
+        var itemId = $(this).attr("id");
+        if (!confirm('Bu hesabatı geri çəkmək istədiyinizdən əminsiniz?')) return;
+
+        $.ajax({
+            url: "/call/index.php?action=add&type=1&module_name=orders",
+            method: "POST",
+            data: { itemId: itemId, confirmed: 0 },
+            beforeSend: function() {
+                $("#data-" + itemId).css("background-color", "#fff3cd");
+                $('.unconfirm-' + itemId).html('<div class="spinner-grow" style="width:1rem;height:1rem;"></div>');
+            },
+            success: function(data) {
+                $("#data-" + itemId).fadeOut(300, function() {
+                    $(this).remove();
+                });
+                noty('Hesabat geri çəkildi', 'warning');
+            }
+        });
     });
 </script>
