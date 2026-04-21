@@ -13,6 +13,7 @@ RewriteRule ^events index.php?action=events
 RewriteRule ^finance2/?$ index.php?action=finance2
 RewriteRule ^finance/?$ index.php?action=finance
 RewriteRule ^customer/([0-9]+)/?$ index.php?action=customer&id=$1 [L]
+RewriteRule ^whatsapp/?$ index.php?action=whatsapp [L]
 RewriteRule ^customers index.php?action=customers
 RewriteRule ^companies index.php?action=companies
 RewriteRule ^settings index.php?action=settings

@@ -180,6 +180,9 @@ if (!isset($_SESSION['login']) || !isset($_SESSION['id']) || $_SESSION['id'] == 
       case "fetch":
         include_once("inc/fetch.php");
         break;
+      case "whatsapp":
+        include_once("whatsapp.php");
+        break;
       default:
         include_once("home.php");
     }

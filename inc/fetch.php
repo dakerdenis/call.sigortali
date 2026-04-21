@@ -494,7 +494,45 @@ AND toAccount='Özü ödədi'
       $companyFilter = (int)$_POST['company'];
       $query .= " AND companyId = $companyFilter";
     }
+// Фильтр по агенту (kim yazıb)
+    if (!empty($_POST['agreeUser'])) {
+      $agreeUserFilter = (int)$_POST['agreeUser'];
+      $query .= " AND agreeUser = $agreeUserFilter";
+    }
 
+    // Дата написания (write_date) — диапазон
+    if (!empty($_POST['date_from'])) {
+      $wdf = mysqli_real_escape_string($db, $_POST['date_from']);
+      $query .= " AND DATE(write_date) >= '$wdf'";
+    }
+    if (!empty($_POST['date_to'])) {
+      $wdt = mysqli_real_escape_string($db, $_POST['date_to']);
+      $query .= " AND DATE(write_date) <= '$wdt'";
+    }
+
+    // Yazılma qiyməti (agreePrice) — min/max
+    if (isset($_POST['agree_min']) && $_POST['agree_min'] !== '' && is_numeric($_POST['agree_min'])) {
+      $query .= " AND agreePrice >= " . (float)$_POST['agree_min'];
+    }
+    if (isset($_POST['agree_max']) && $_POST['agree_max'] !== '' && is_numeric($_POST['agree_max'])) {
+      $query .= " AND agreePrice <= " . (float)$_POST['agree_max'];
+    }
+
+    // Mühərrikə görə sığorta haqqı (defaultPrice) — min/max
+    if (isset($_POST['default_min']) && $_POST['default_min'] !== '' && is_numeric($_POST['default_min'])) {
+      $query .= " AND defaultPrice >= " . (float)$_POST['default_min'];
+    }
+    if (isset($_POST['default_max']) && $_POST['default_max'] !== '' && is_numeric($_POST['default_max'])) {
+      $query .= " AND defaultPrice <= " . (float)$_POST['default_max'];
+    }
+
+    // Sığorta haqqı (price) — min/max
+    if (isset($_POST['price_min']) && $_POST['price_min'] !== '' && is_numeric($_POST['price_min'])) {
+      $query .= " AND price >= " . (float)$_POST['price_min'];
+    }
+    if (isset($_POST['price_max']) && $_POST['price_max'] !== '' && is_numeric($_POST['price_max'])) {
+      $query .= " AND price <= " . (float)$_POST['price_max'];
+    }
     if ($userGroup == 3) {
       $query .= " AND agreeUser = '$user_id' ";
     }
@@ -610,21 +648,23 @@ AND toAccount='Özü ödədi'
                     <p><i class="fa fa-phone" aria-hidden="true"></i> ' . lang('Zəng et') . '</p>
                     </button>
 
-                    <a href="https://wa.me/' . $row['phone'] . '?text=SalamH%C3%B6rm%C9%99tli+m%C3%BC%C5%9Ft%C9%99ri%2C+' . $row['car_id'] . '+DQN-li+n%C9%99qliyyat+vasit%C9%99sinin+icbari+s%C4%B1%C4%9Forta+polisi+dem%C9%99k+olar+ki%2C+haz%C4%B1rd%C4%B1r.+S%C4%B1%C4%9Forta+haqq%C4%B1n%C4%B1+%C3%B6yr%C9%99nm%C9%99k+v%C9%99+ya+s%C4%B1%C4%9Forta+polisinizi+%C9%99ld%C9%99+etm%C9%99k+%C3%BC%C3%A7%C3%BCn+biz%C9%99+m%C3%BCraci%C9%99t+ed%C9%99+bil%C9%99rsiniz." class="my-btn btn btn-success active" title="' . lang('Cavab Vermədi') . '" target="_blank">
-                    <p><i class="fa fa-whatsapp" aria-hidden="true"></i> 1</p>
-                    </a>
-                    <a href="https://wa.me/' . $row['phone'] . '?text=H%C3%B6rm%C9%99tli+m%C3%BC%C5%9Ft%C9%99ri%2C+' . $row['car_id'] . '+DQN-li+n%C9%99qliyyat+vasit%C9%99sinin+icbari+s%C4%B1%C4%9Forta+polisini+r%C9%99smil%C9%99%C5%9Fdirm%C9%99k+%C3%BC%C3%A7%C3%BCn+siz%C9%99+kod+g%C3%B6nd%C9%99rildi.+A%C5%9Fa%C4%9F%C4%B1da+qeyd+edil%C9%99n+koda+%C3%B6d%C9%99ni%C5%9F+etm%C9%99kl%C9%99+s%C4%B1%C4%9Forta+polisinizi+r%C9%99smil%C9%99%C5%9Fdir%C9%99+bil%C9%99rsiniz.+%C3%96d%C9%99ni%C5%9F+kodu+48+saat+m%C3%BCdd%C9%99tind%C9%99+q%C3%BCvv%C9%99d%C9%99dir.+%C3%96d%C9%99ni%C5%9Fl%C9%99+ba%C4%9Fl%C4%B1+%C3%A7%C9%99tinliyiniz+v%C9%99+ya+h%C9%99r+hans%C4%B1+sual%C4%B1n%C4%B1z+olarsa%2C+biziml%C9%99+%C9%99laq%C9%99+saxlay%C4%B1n." class="my-btn btn btn-success active" title="' . lang('Razılaşdı') . '" target="_blank">
-                    <p><i class="fa fa-whatsapp" aria-hidden="true"></i> 2</p>
-                    </a>
-                    <a href="https://wa.me/' . $row['phone'] . '?text=%C3%96d%C9%99ni%C5%9Finizi+%C5%9F%C9%99xsi+bank+kartlar%C4%B1n%C4%B1z+il%C9%99+gpp.az+sayt%C4%B1ndan+v%C9%99+ya+%E2%80%9CMilliON%E2%80%9D+v%C9%99+%E2%80%9CEManat%E2%80%9D+%C3%B6d%C9%99ni%C5%9F+terminallar%C4%B1+vasit%C9%99si+il%C9%99+ed%C9%99+bil%C9%99rsiniz." class="my-btn btn btn-success active" title="' . lang('Ödəniş forması') . '" target="_blank">
-                    <p><i class="fa fa-whatsapp" aria-hidden="true"></i> 3</p>
-                    </a>
-                    <a href="https://wa.me/' . $row['phone'] . '?text=Salam+h%C3%B6rm%C9%99tli+m%C3%BC%C5%9Ft%C9%99ri.+' . $row['car_id'] . '+DQN-li+n%C9%99qliyyat+vasit%C9%99sinin+bu+ilki+s%C4%B1%C4%9Forta+haqq%C4%B1n%C4%B1+hesablaya+bilm%C9%99yimiz+%C3%BC%C3%A7%C3%BCn+z%C9%99hm%C9%99t+olmasa+s%C3%BCr%C3%BCc%C3%BCl%C3%BCk+v%C9%99siq%C9%99nizin+%C5%9F%C9%99klini+v%C9%99+ya+seriya+v%C9%99+n%C3%B6mr%C9%99sini+yaz%C4%B1l%C4%B1+%C5%9F%C9%99kild%C9%99+biz%C9%99+g%C3%B6nd%C9%99rin." class="my-btn btn btn-success active" title="' . lang('SV Sorğusu') . '" target="_blank">
-                    <p><i class="fa fa-whatsapp" aria-hidden="true"></i> 4</p>
-                    </a>
-                    <a href="https://wa.me/' . $row['phone'] . '?text=%E2%9C%85+M%C9%99lumat+verm%C9%99k+ist%C9%99rdim+ki%2C+G%C9%99l%C9%99n+aydan+etibar%C9%99n+%C4%B0cbari+S%C4%B1%C4%9Fortas%C4%B1+olmayan+M%C9%99nzill%C9%99r%C9%99++v%C9%99+F%C9%99rdi+ya%C5%9Fay%C4%B1%C5%9F+evl%C9%99rin%C9%99+C%C9%99rim%C9%99+t%C9%99tbiq+olunaca%C4%9F%C4%B1+g%C3%B6zl%C9%99nilir.%0D%0A%E2%9C%85+Qeyd+edim+ki%2C+M%C9%99nzill%C9%99rinizin+icbari+S%C4%B1%C4%9Fortas%C4%B1n%C4%B1+tez+v%C9%99+operativ+%C5%9F%C9%99kild%C9%99+bizd%C9%99n+%C9%99ld%C9%99+ed%C9%99+bil%C9%99rsiniz.%0D%0A%0D%0A%E2%9C%85+Qiym%C9%99t%3A+Bak%C4%B1+%C5%9F%C9%99h%C9%99ri+%C3%BCzr%C9%99%3A+50+AZN%2C+G%C9%99nc%C9%99%2C+Sumqay%C4%B1t%2C+Nax%C3%A7%C4%B1van+%C3%BCzr%C9%99%3A+40+AZN%2C+Dig%C9%99r+%C5%9F%C9%99h%C9%99r+v%C9%99+rayonlar+%C3%BCzr%C9%99%3A+30+AZN+t%C9%99%C5%9Fkil+edir.%0D%0A%0D%0A%E2%9C%8D%EF%B8%8F+%C6%8Fld%C9%99+etm%C9%99k+%C3%BC%C3%A7%C3%BCn%3A+Evin+s%C9%99n%C9%99dinin+%28%C3%A7%C4%B1xar%C4%B1%C5%9F%2C+m%C3%BCqavil%C9%99+v%C9%99.s%29+v%C9%99+s%C9%99n%C9%99dd%C9%99+ad%C4%B1+qeyd+edil%C9%99n+%C5%9F%C9%99xsin+%C5%9E%C9%99xsiyy%C9%99t+v%C9%99siq%C9%99sinin+%C5%9F%C9%99kill%C9%99rini+biz%C9%99+g%C3%B6nd%C9%99rin+s%C4%B1%C4%9Fortan%C4%B1z%C4%B1+r%C9%99smil%C9%99%C5%9Fdir%C9%99k." class="my-btn btn btn-success active" title="' . lang('Əmlak sığortası') . '" target="_blank">
-                    <p><i class="fa fa-whatsapp" aria-hidden="true"></i> 5</p>
-                    </a>
+';
+// === Dynamic WhatsApp buttons from JSON ===
+$waJsonPath = __DIR__ . '/../data/whatsapp_templates.json';
+$waTemplates = [];
+if (file_exists($waJsonPath)) {
+    $waTemplates = json_decode(file_get_contents($waJsonPath), true) ?: [];
+}
+foreach ($waTemplates as $wIdx => $wTpl) {
+    $waMsg = str_replace(['{car_id}', '{phone}'], [$row['car_id'], $row['phone']], $wTpl['message']);
+    $waUrl = 'https://wa.me/' . $row['phone'] . '?text=' . rawurlencode($waMsg);
+    $waTitle = htmlspecialchars($wTpl['title']);
+    $output_grid .= '
+                    <a href="' . $waUrl . '" class="my-btn btn btn-success active" title="' . $waTitle . '" target="_blank">
+                    <p><i class="fa fa-whatsapp" aria-hidden="true"></i> ' . ($wIdx + 1) . '</p>
+                    </a>';
+}
+$output_grid .= '
                 </div>
                 <div class="view-actions">
                     <button class="view-btn active" title="' . lang('Status ver') . '" data-bs-toggle="modal" data-bs-target=".modalAddStatus">

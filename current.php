@@ -51,6 +51,51 @@
                 </select>
             </div>
 
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label"><i class="fa fa-user"></i> Kim yazıb</label>
+                <select id="filter_user" class="form-select">
+                    <option value="">Hamısı</option>
+                    <?php
+                    $sqlU = mysqli_query($db, "SELECT id, name, surname FROM users WHERE deletedby = 0 AND status = 1 ORDER BY name ASC");
+                    while($rowU = mysqli_fetch_array($sqlU)){
+                        echo '<option value="'.$rowU['id'].'">'.htmlspecialchars($rowU['name'].' '.$rowU['surname']).'</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label"><i class="fa fa-calendar"></i> Yazılma tarixi</label>
+                <div class="d-flex gap-1">
+                    <input type="date" id="filter_date_from" class="form-control" placeholder="Dən">
+                    <input type="date" id="filter_date_to" class="form-control" placeholder="Dək">
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-4">
+                <label class="form-label">Yazılma qiyməti</label>
+                <div class="d-flex gap-1">
+                    <input type="number" step="0.01" id="filter_agree_min" class="form-control" placeholder="Min">
+                    <input type="number" step="0.01" id="filter_agree_max" class="form-control" placeholder="Max">
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-4">
+                <label class="form-label">Mühərrikə görə</label>
+                <div class="d-flex gap-1">
+                    <input type="number" step="0.01" id="filter_default_min" class="form-control" placeholder="Min">
+                    <input type="number" step="0.01" id="filter_default_max" class="form-control" placeholder="Max">
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-4">
+                <label class="form-label">Sığorta haqqı</label>
+                <div class="d-flex gap-1">
+                    <input type="number" step="0.01" id="filter_price_min" class="form-control" placeholder="Min">
+                    <input type="number" step="0.01" id="filter_price_max" class="form-control" placeholder="Max">
+                </div>
+            </div>
+
             <div class="col-lg-2 col-md-4">
                 <label class="form-label"><i class="fa fa-sort"></i> Tarix sıralaması</label>
                 <select id="filter_sort" class="form-select">
@@ -120,8 +165,18 @@ function load_data(page) {
             query: $('#filter_query').val(),
             limit: $('#limit').val(),
             company: $('#filter_company').val(),
-            sort: $('#filter_sort').val()
+            sort: $('#filter_sort').val(),
+            agreeUser: $('#filter_user').val(),
+            date_from: $('#filter_date_from').val(),
+            date_to: $('#filter_date_to').val(),
+            agree_min: $('#filter_agree_min').val(),
+            agree_max: $('#filter_agree_max').val(),
+            default_min: $('#filter_default_min').val(),
+            default_max: $('#filter_default_max').val(),
+            price_min: $('#filter_price_min').val(),
+            price_max: $('#filter_price_max').val()
         },
+
         beforeSend: function() {
             $("#dynamic_content").html('<center><div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status"><span class="sr-only"></span></div></center>');
         },
@@ -139,8 +194,13 @@ $('#applyFilters').on('click', function() {
 $('#resetFilters').on('click', function() {
     $('#filter_query').val('');
     $('#filter_company').val('');
+    $('#filter_user').val('');
     $('#filter_sort').val('desc');
     $('#limit').val('10');
+    $('#filter_date_from, #filter_date_to').val('');
+    $('#filter_agree_min, #filter_agree_max').val('');
+    $('#filter_default_min, #filter_default_max').val('');
+    $('#filter_price_min, #filter_price_max').val('');
     load_data(1);
 });
 
@@ -148,7 +208,7 @@ $('#filter_query').on('keypress', function(e) {
     if (e.which == 13) load_data(1);
 });
 
-$('#filter_company, #filter_sort, #limit').on('change', function() {
+$('#filter_company, #filter_sort, #limit, #filter_user').on('change', function() {
     load_data(1);
 });
 

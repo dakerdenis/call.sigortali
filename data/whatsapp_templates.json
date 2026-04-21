@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "title": "Sığorta hazırdır",
+    "message": "Salam Hörmətli müştəri, {car_id} DQN-li nəqliyyat vasitəsinin icbari sığorta polisi demək olar ki, hazırdır. Sığorta haqqını öyrənmək və ya sığorta polisinizi əldə etmək üçün bizə müraciət edə bilərsiniz."
+  },
+  {
+    "id": 2,
+    "title": "Ödəniş kodu",
+    "message": "Hörmətli müştəri, {car_id} DQN-li nəqliyyat vasitəsinin icbari sığorta polisini rəsmiləşdirmək üçün sizə kod göndərildi. Aşağıda qeyd edilən koda ödəniş etməklə sığorta polisinizi rəsmiləşdirə bilərsiniz. Ödəniş kodu 48 saat müddətində qüvvədədir. Ödənişlə bağlı çətinliyiniz və ya hər hansı sualınız olarsa, bizimlə əlaqə saxlayın."
+  },
+  {
+    "id": 3,
+    "title": "Ödəniş forması",
+    "message": "Ödənişinizi şəxsi bank kartlarınız ilə gpp.az saytından və ya \"MilliON\" və \"EManat\" ödəniş terminalları vasitəsi ilə edə bilərsiniz."
+  },
+  {
+    "id": 4,
+    "title": "SV Sorğusu",
+    "message": "Salam hörmətli müştəri. {car_id} DQN-li nəqliyyat vasitəsinin bu ilki sığorta haqqını hesablaya bilməyimiz üçün zəhmət olmasa sürücülük vəsiqənizin şəklini və ya seriya və nömrəsini yazılı şəkildə bizə göndərin."
+  },
+  {
+    "id": 5,
+    "title": "Əmlak sığortası",
+    "message": "✅ Məlumat vermək istərdim ki, Gələn aydan etibarən İcbari Sığortası olmayan Mənzillərə  və Fərdi yaşayış evlərinə Cərimə tətbiq olunacağı gözlənilir.\r\n✅ Qeyd edim ki, Mənzillərinizin icbari Sığortasını tez və operativ şəkildə bizdən əldə edə bilərsiniz.\r\n\r\n✅ Qiymət: Bakı şəhəri üzrə: 50 AZN, Gəncə, Sumqayıt, Naxçıvan üzrə: 40 AZN, Digər şəhər və rayonlar üzrə: 30 AZN təşkil edir.\r\n\r\n✍️ Əldə etmək üçün: Evin sənədinin (çıxarış, müqavilə və.s) və sənəddə adı qeyd edilən şəxsin Şəxsiyyət vəsiqəsinin şəkillərini bizə göndərin sığortanızı rəsmiləşdirək."
+  }
+]
