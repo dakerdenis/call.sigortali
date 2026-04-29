@@ -583,7 +583,7 @@ AND toAccount='Özü ödədi'
               <div class="modal-dialog">
                   <div class="modal-content">
 
-                    <div class="modal-body" style="min-height: 470px; max-height: 470px; overflow: auto;">';
+                    <div class="modal-body" style="min-height: 470px; max-height: 670px; overflow: scroll;">';
 
       $queryShow = "SELECT * FROM call_status WHERE car_id = '" . $row['car_id'] . "' ORDER by id DESC";
       $sqlShow = mysqli_query($db, $queryShow);
@@ -604,20 +604,20 @@ AND toAccount='Özü ödədi'
           $status = '<span style="display: block; padding: 5px; background-color: green; width: 100%; color: #fff;">' . $getParamitem['title'] . '</span>';
         }
 
-        $output_grid .= '
-
-                                    <div class="alert alert-danger ' . $getParamitem['code'] . '" role="alert">
-                                        <strong>' . $getCreated['name'] . ' ' . $getCreated['surname'] . ': </strong> ' . $getParamitem['title'] . '<br>
-                                        ' . (($rowShow['next_date'] != '0000-00-00 00:00:00') ? '<strong>Xatırlatma Tarixi: </strong> ' . $rowShow['next_date'] . '<br> ' : "") . '
-                                        ' . ((!empty($rowShow['content'])) ? '<strong>Qeyd: </strong> ' . $rowShow['content'] . '<br> ' : "") . '
-                                        ' . ((!empty($rowShow['companyId'])) ? '<strong>Şirkət: </strong> ' . $selectedCompany['title'] . '<br> ' : "") . '
-                                        ' . (($rowShow['price'] != '0.00') ? '<strong>Qiymət: </strong> ' . $rowShow['price'] . '<br> ' : "") . '
-                                        ' . (($rowShow['agreePrice'] != '0.00') ? '<strong>Razılaşdığı Qiymət: </strong> ' . $rowShow['agreePrice'] . '<br> ' : "") . '
-                                        ' . ((!empty($rowShow['paycode'])) ? '<strong>Ödəniş Kodu: </strong> ' . $rowShow['paycode'] . '<br> ' : "") . '
-                                        <strong>Status Tarixi: </strong> ' . $rowShow['created'] . '
-                                        <span class="fright d-none">' . $rowShow['created'] . '</span>
-                                    </div>
-
+$output_grid .= '
+                    <div class="status-item ' . $getParamitem['code'] . '">
+                        <div class="status-header">
+                            <span class="status-user">' . $getCreated['name'] . ' ' . $getCreated['surname'] . '</span>
+                            <span class="status-date">' . date("d.m.Y H:i", strtotime($rowShow['created'])) . '</span>
+                        </div>
+                        <span class="status-badge">' . $getParamitem['title'] . '</span>
+                        ' . (($rowShow['next_date'] != '0000-00-00 00:00:00') ? '<div class="status-detail"><strong>Xatırlatma:</strong> ' . $rowShow['next_date'] . '</div>' : "") . '
+                        ' . ((!empty($rowShow['content'])) ? '<div class="status-detail"><strong>Qeyd:</strong> ' . $rowShow['content'] . '</div>' : "") . '
+                        ' . ((!empty($rowShow['companyId'])) ? '<div class="status-detail"><strong>Şirkət:</strong> ' . $selectedCompany['title'] . '</div>' : "") . '
+                        ' . (($rowShow['price'] != '0.00') ? '<div class="status-detail"><strong>Qiymət:</strong> ' . $rowShow['price'] . '</div>' : "") . '
+                        ' . (($rowShow['agreePrice'] != '0.00') ? '<div class="status-detail"><strong>Razılaşdığı:</strong> ' . $rowShow['agreePrice'] . '</div>' : "") . '
+                        ' . ((!empty($rowShow['paycode'])) ? '<div class="status-detail"><strong>Ödəniş kodu:</strong> ' . $rowShow['paycode'] . '</div>' : "") . '
+                    </div>
                                 ';
 
         if (empty($agreePrice) && $rowShow['agreePrice'] != '0.00') {
@@ -746,7 +746,7 @@ $output_grid .= '
                             <td class="editable-' . $row['id'] . ' copycolor pointer" data-column="name"><span onclick="copyToClipboard(`' . $row['name'] . '`);">' . $row['name'] . '</span></td>
                             <td class="text-right">İcbari avto</td>
                             <td class="editable-' . $row['id'] . ' copycolor pointer" data-column="phone"><span onclick="copyToClipboard(`' . substr($row['phone'], 5) . '`);">' . $row['phone'] . '</span></td>
-                            <td class="editable-' . $row['id'] . ' copycolor pointer" data-column="pin"><span onclick="copyToClipboard(`' . $row['pin'] . '`);">' . $row['pin'] . '</span></td>
+                            <td class="editable-' . $row['id'] . ' copycolor pointer" data-column="pin"><a target="_blank" href="/call/customer/' . $row['id'] . '" style="color:#4e73df;font-weight:600;text-decoration:none;" title="Müştəri profilinə keç">' . $row['pin'] . '</a></td>
                             <td class="editable-' . $row['id'] . ' copycolor pointer" data-column="pin_serial"><span onclick="copyToClipboard(`' . $row['pin_serial'] . '`);">' . $row['pin_serial'] . '</span></td>
                             <td class="editable-' . $row['id'] . ' copycolor pointer" data-column="serial"><span onclick="copyToClipboard(`' . $row['serial'] . '`);">' . $row['serial'] . '</span></td>
                         </tr>
@@ -854,7 +854,7 @@ $output_grid .= '
 
             </div>
 
-            <script>$("#car_id_input").val("' . $row['car_id'] . '");</script>
+            <script>$("#waiting_end_date").val("' . date("Y-m-d", strtotime($row['end_date'])) . '");</script>
             <script>$("#addFromJS").val("' . $row['car_id'] . '");</script>
             <script>
             function copyToClipboard(element) {
@@ -1018,7 +1018,7 @@ $output_grid .= '
 
       // ===== Status badge =====
       if ($row['status'] == 0) {
-        $statusBadge      = '<span class="badge bg-secondary"><i class="fa fa-circle-o"></i> Passiv</span>';
+        $statusBadge      = '<span class="badge bg-secondary"><i class="fa fa-circle-o"></i> Deaktiv</span>';
         $datastatus       = "1";
         $datastatusTitle  = "Aktiv et";
         $datastatusIcon   = "unlock-alt";
@@ -1026,7 +1026,7 @@ $output_grid .= '
       } else {
         $statusBadge      = '<span class="badge bg-success"><i class="fa fa-check-circle"></i> Aktiv</span>';
         $datastatus       = "0";
-        $datastatusTitle  = "Passiv et";
+        $datastatusTitle  = "Deaktiv et";
         $datastatusIcon   = "lock";
         $datastatusBtnCls = "btn-outline-warning";
       }
@@ -1570,22 +1570,22 @@ $output_grid .= '
     }
   } else if ($_GET['type'] == 11) { // current
 
-    $output .= '
+$output .= '
     <thead>
       <tr>
-        <th>SIĞORTA NÖVÜ</th>
-        <th>SIGORTA SIRKETI</th>
-        <th>SEHADETNAME NOMRESI</th>
+        <th>Növ</th>
+        <th>Şirkət</th>
+        <th>Şəhadətnamə</th>
         <th>DQN</th>
-        <th>KIM YAZIB</th>
-        <th>MUHHERIKE GORE SIGORTA HAQQI</th>
-        <th>YAZILMA QIYMETI</th>
-        <th>SIĞORTA HAQQI</th>
-        <th>YAZILMA TARİXİ</th>
-        <th>QEYD</th>
+        <th>Agent</th>
+        <th style="text-align:right;">Mühərrik</th>
+        <th style="text-align:right;">Yazılma qiy.</th>
+        <th style="text-align:right;">Sığorta haqqı</th>
+        <th>Tarix</th>
+        <th>Qeyd</th>
       </tr>
-      </thead>
-        <tbody>
+    </thead>
+    <tbody>
     ';
 
     foreach ($result as $row) {
@@ -1653,26 +1653,23 @@ $output_grid .= '
 
       if ($show == 1) {
 
-        $output .= '
-                <tr id="data-' . $row['id'] . '" class="forProgress" style="' . $bgcolor . '">
-                  <td>İCBARİ</td>
-                  <td>' . $getSupplier['title'] . '</td>
-                  <td class="editable-' . $row['id'] . '" data-column="identification">' . $row['identification'] . '</td>
-                  <td><a href="/call/' . $row['car_id'] . '" target="_blank">' . $row['car_id'] . '</a></td>
-                  <td>' . $getUserAgree['name'] . ' ' . $getUserAgree['surname'] . '</td>
-                  <td class="text-end editable-' . $row['id'] . '" data-column="defaultPrice">
-                    ' . number_format($row['defaultPrice'], 2, '.', ' ') . '
-                  </td>
-                  <td class="text-end editable-' . $row['id'] . '" data-column="agreePrice">
-                  <strong>' . number_format($row['agreePrice'], 2, '.', ' ') . '</strong>
-                  </td>
-
-                  <td class="text-end editable-' . $row['id'] . '" data-column="price">
-' . number_format($row['price'], 2, '.', ' ') . '
-</td>
-                  <td class="editable-' . $row['id'] . '" data-column="write_date">' . date("d.m.Y", strtotime($row['write_date'])) . '</td>
-                  <td class="editable-' . $row['id'] . '" data-column="content">' . $row['content'] . '</td>
+$output .= '
+                <tr id="data-' . $row['id'] . '" class="forProgress">
+                  <td><span class="badge bg-secondary" style="font-size:11px;">İCBARİ</span></td>
+                  <td><span class="badge-company">' . $getSupplier['title'] . '</span></td>
+                  <td class="editable-' . $row['id'] . '" data-column="identification" style="font-family:monospace;font-size:16px;">' . $row['identification'] . '</td>
+                  <td><a href="/call/' . $row['car_id'] . '" target="_blank" style="color:#4e73df;font-weight:600;text-decoration:none;">' . $row['car_id'] . '</a></td>
+                  <td><span class="badge-agent">' . $getUserAgree['name'] . ' ' . $getUserAgree['surname'] . '</span></td>
+                  <td class="price-cell editable-' . $row['id'] . '" data-column="defaultPrice">' . number_format($row['defaultPrice'], 2, '.', ' ') . '</td>
+                  <td class="price-cell editable-' . $row['id'] . '" data-column="agreePrice" style="color:#1cc88a;">' . number_format($row['agreePrice'], 2, '.', ' ') . '</td>
+                  <td class="price-cell editable-' . $row['id'] . '" data-column="price">' . number_format($row['price'], 2, '.', ' ') . '</td>
+                  <td class="date-cell editable-' . $row['id'] . '" data-column="write_date">' . date("d.m.Y", strtotime($row['write_date'])) . '</td>
+                  <td class="note-cell editable-' . $row['id'] . '" data-column="content" title="' . htmlspecialchars($row['content']) . '">' . $row['content'] . '</td>
           ';
+
+
+
+
       }
 
       $output .= '</tr>';

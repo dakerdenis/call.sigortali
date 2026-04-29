@@ -123,8 +123,8 @@
             
             <? if($user_id == 1 || $user_id == 2){ ?>
             
-            <hr>
-            
+
+           <!---- 
             <form id="transferdata" class="row transferdata">
 
 
@@ -178,10 +178,10 @@
 
 
             </form>
-            
+            -->
             <? } ?>
             
-            <hr>
+
 
         <div id="dynamic_content" class="customersTable table-responsive">
           <center><div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status"><span class="sr-only"></span></div></center>
@@ -328,7 +328,7 @@
             <div class="form-check form-switch form-switch-lg" style="padding-left:3em;">
               <input class="form-check-input" type="checkbox" role="switch" id="edit_status" style="width:3em;height:1.5em;cursor:pointer;">
               <label class="form-check-label ms-2" for="edit_status" id="edit_status_label">
-                <span class="badge bg-secondary">Passiv</span>
+                <span class="badge bg-secondary">Deaktiv</span>
               </label>
             </div>
             <small class="text-muted"><?= lang('İstifadəçinin sistemə daxil olma icazəsi'); ?></small>
@@ -546,7 +546,7 @@ function updateStatusLabel(isActive) {
     if (isActive) {
         $('#edit_status_label').html('<span class="badge bg-success"><i class="fa fa-check-circle"></i> Aktiv</span>');
     } else {
-        $('#edit_status_label').html('<span class="badge bg-secondary"><i class="fa fa-circle-o"></i> Passiv</span>');
+        $('#edit_status_label').html('<span class="badge bg-secondary"><i class="fa fa-circle-o"></i> Deaktiv</span>');
     }
 }
 

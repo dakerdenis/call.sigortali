@@ -429,12 +429,16 @@
               <textarea class="form-control" name="note" style="height: 50px;" placeholder="Qeyd"></textarea>
             </div>
           </div>
-          <div class="waitingData form-group row mt-3 mr-0 mb-3 ml-0" style="display:none;">
-            <div class="col-xl-12">
-              <p>Xatırlatma Tarixi:</p>
-              <input id="next_date" class="form-control" type="datetime-local" name="next_date">
-            </div>
-          </div>
+<div class="waitingData form-group row mt-3 mr-0 mb-3 ml-0" style="display:none;">
+    <div class="col-xl-12">
+      <p>Xatırlatma Tarixi:</p>
+      <input id="next_date" class="form-control" type="datetime-local" name="next_date">
+      <br>
+      <p>Bitmə Tarixi:</p>
+      <input id="waiting_end_date" class="form-control" type="date" name="end_date">
+    </div>
+</div>
+          
           <div class="forwardData form-group row mt-3 mr-0 mb-3 ml-0" style="display:none;">
             <div class="col-xl-12">
               <p><?= lang("İstifadəçi Seçin"); ?>:</p>
@@ -581,12 +585,13 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel"><?= lang('Ödəniş Et'); ?> </h5>
+        <h5 class="modal-title" id="exampleModalLabel"><?= lang('Borcun ödənilməsi'); ?> </h5>
         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <p style="font-size: 13px;">Bu onun üçündür ki müştəri həmin an ödənişi etməyib debitordu lakin bir müddət sonra borcunu ödüyüb onda bu şəkildə əsas səhifədən qeyd edirik</p>
+
+      <p style="font-size: 13px; display: none; visibility: hidden;">Bu onun üçündür ki müştəri həmin an ödənişi etməyib debitordu lakin bir müddət sonra borcunu ödüyüb onda bu şəkildə əsas səhifədən qeyd edirik</p>
       <div class="modal-body" style="overflow: hidden;">
 
         <form id="form_add_payment">
@@ -715,7 +720,20 @@
     });
 
     $(document).ready(function() {
-
+$('#statusForm_add').on('submit', function(e) {
+    var nextDate = $('#next_date').val();
+    var endDate = $('#waiting_end_date').val();
+    if (nextDate && endDate) {
+        var nd = new Date(nextDate);
+        var ed = new Date(endDate);
+        if (ed <= nd) {
+            alert('Bitmə tarixi xatırlatma tarixindən sonra olmalıdır!');
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return false;
+        }
+    }
+});
       $('#statusForm_add').on('submit', (function(e) {
 
         $('.addStatusButton').prop('disabled', true);

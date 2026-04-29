@@ -9,7 +9,7 @@
         margin-bottom: 20px;
     }
     .filter-card .form-label {
-        font-size: 12px;
+        font-size: 16px;
         font-weight: 600;
         color: #6c757d;
         text-transform: uppercase;
@@ -26,11 +26,80 @@
         border-color: #4e73df;
         box-shadow: 0 0 0 0.15rem rgba(78,115,223,.15);
     }
+    /* Current table styling */
+    #dynamic_content table {
+        font-size: 16px;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    #dynamic_content thead th {
+        background: #f8f9fc;
+        color: #5a5c69;
+        font-size: 16px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 10px 12px;
+        border-bottom: 2px solid #e3e6f0;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+    #dynamic_content tbody td {
+        padding: 8px 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 16px;
+    }
+    #dynamic_content tbody tr:hover {
+        background: #f8f9fc;
+    }
+    #dynamic_content .badge-company {
+
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    #dynamic_content .badge-agent {
+        background: #e0f2f1;
+        color: #00796b;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    #dynamic_content .price-cell {
+     /*font-family: 'Courier New', monospace; */
+        font-weight: 600;
+        text-align: right;
+        white-space: nowrap;
+    }
+    #dynamic_content .date-cell {
+        white-space: nowrap;
+        color: #6c757d;
+
+    }
+    #dynamic_content .note-cell {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #6c757d;
+
+    }
 </style>
 
 <div class="projects-section">
 
     <div class="filter-card">
+                    <?php if($userGroup == 1 || $userGroup == 2){ ?>
+            <div class="col-12 text-end">
+                <button type="button" id="exportToExcel" data-id=".customersTable" class="btn btn-success btn-sm">
+                    <i class="fa fa-file-excel-o"></i> Excel
+                </button>
+            </div>
+            <?php } ?>
         <div class="row g-3 align-items-end">
 
             <div class="col-lg-3 col-md-6">
@@ -126,13 +195,7 @@
                 </button>
             </div>
 
-            <?php if($userGroup == 1 || $userGroup == 2){ ?>
-            <div class="col-12 text-end">
-                <button type="button" id="exportToExcel" data-id=".customersTable" class="btn btn-success btn-sm">
-                    <i class="fa fa-file-excel-o"></i> Excel
-                </button>
-            </div>
-            <?php } ?>
+
 
         </div>
     </div>

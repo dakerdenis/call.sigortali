@@ -155,6 +155,25 @@
         text-align: center; padding: 40px 20px; color: #adb5bd;
     }
     .empty-state i { font-size: 36px; margin-bottom: 10px; display: block; }
+    .status-item { padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #4e73df; background: #f8f9fc; }
+    .status-item .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .status-item .status-user { font-weight: 700; font-size: 14px; color: #333; }
+    .status-item .status-date { font-size: 12px; color: #999; }
+    .status-item .status-badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #fff; background: #4e73df; }
+    .status-item .status-detail { font-size: 13px; color: #555; margin-top: 4px; }
+    .status-item .status-detail strong { color: #333; }
+    .status-item.success { border-left-color: #1cc88a; }
+    .status-item.success .status-badge { background: #1cc88a; }
+    .status-item.waiting { border-left-color: #f6c23e; }
+    .status-item.waiting .status-badge { background: #f6c23e; color: #333; }
+    .status-item.confirm { border-left-color: #36b9cc; }
+    .status-item.confirm .status-badge { background: #36b9cc; }
+    .status-item.paywait { border-left-color: #fd7e14; }
+    .status-item.paywait .status-badge { background: #fd7e14; }
+    .status-item.forward { border-left-color: #6f42c1; }
+    .status-item.forward .status-badge { background: #6f42c1; }
+    .status-item.payed { border-left-color: #e74a3b; }
+    .status-item.payed .status-badge { background: #e74a3b; }
 </style>
 
 <div class="projects-section">
@@ -350,30 +369,40 @@
                         echo '<div class="empty-state"><i class="fa fa-history"></i>Status tapılmadı</div>';
                     } else {
                         $carInList = "'" . implode("','", array_map(function($c) use($db){ return mysqli_real_escape_string($db, $c); }, $carIds)) . "'";
-                        $sqlHist = mysqli_query($db,
-                            "SELECT cs.*, u.name AS uname, u.surname AS usurname, p.title AS ptitle, c.title AS ctitle
-                             FROM call_status cs
-                             LEFT JOIN users u ON u.id = cs.createdby
-                             LEFT JOIN paramitems p ON p.id = cs.type
-                             LEFT JOIN companies c ON c.id = cs.companyId
-                             WHERE cs.car_id IN ($carInList) AND cs.deletedby = 0
-                             ORDER BY cs.id DESC LIMIT 50");
-                        $hasHist = false;
-                        while ($h = mysqli_fetch_array($sqlHist)) {
-                            $hasHist = true;
-                            echo '<div class="timeline-item">';
-                            echo '<div style="font-weight:600;color:#212529;">' . htmlspecialchars($h['ptitle'] ?: '—') . '</div>';
-                            echo '<div class="timeline-meta">';
-                            echo '<i class="fa fa-user-o"></i> ' . htmlspecialchars(trim(($h['uname'] ?? '') . ' ' . ($h['usurname'] ?? ''))) ?: 'Naməlum';
-                            echo ' &middot; <i class="fa fa-clock-o"></i> ' . safeDate($h['created'], "d.m.Y H:i");
-                            if (!empty($h['car_id'])) echo ' &middot; <i class="fa fa-car"></i> ' . htmlspecialchars($h['car_id']);
-                            if (!empty($h['ctitle'])) echo ' &middot; <i class="fa fa-shield"></i> ' . htmlspecialchars($h['ctitle']);
-                            echo '</div>';
-                            if (!empty($h['content'])) {
-                                echo '<div class="timeline-content">' . nl2br(htmlspecialchars($h['content'])) . '</div>';
-                            }
-                            echo '</div>';
-                        }
+
+
+
+
+$sqlHist = mysqli_query($db,
+    "SELECT cs.*, u.name AS uname, u.surname AS usurname, p.title AS ptitle, p.code AS pcode, c.title AS ctitle
+     FROM call_status cs
+     LEFT JOIN users u ON u.id = cs.createdby
+     LEFT JOIN paramitems p ON p.id = cs.type
+     LEFT JOIN companies c ON c.id = cs.companyId
+     WHERE cs.car_id IN ($carInList) AND cs.deletedby = 0
+     ORDER BY cs.id DESC LIMIT 50");
+$hasHist = false;
+while ($h = mysqli_fetch_array($sqlHist)) {
+    $hasHist = true;
+    $pcode = $h['pcode'] ?? '';
+    echo '<div class="status-item ' . htmlspecialchars($pcode) . '">';
+    echo '<div class="status-header">';
+    echo '<span class="status-user">' . htmlspecialchars(trim(($h['uname'] ?? '') . ' ' . ($h['usurname'] ?? ''))) . '</span>';
+    echo '<span class="status-date">' . safeDate($h['created'], "d.m.Y H:i") . '</span>';
+    echo '</div>';
+    echo '<span class="status-badge">' . htmlspecialchars($h['ptitle'] ?: '—') . '</span>';
+    if (!empty($h['car_id'])) echo '<div class="status-detail"><strong>DQN:</strong> ' . htmlspecialchars($h['car_id']) . '</div>';
+    if (!empty($h['next_date']) && $h['next_date'] != '0000-00-00 00:00:00') echo '<div class="status-detail"><strong>Xatırlatma:</strong> ' . safeDate($h['next_date'], "d.m.Y H:i") . '</div>';
+    if (!empty($h['content'])) echo '<div class="status-detail"><strong>Qeyd:</strong> ' . nl2br(htmlspecialchars($h['content'])) . '</div>';
+    if (!empty($h['ctitle'])) echo '<div class="status-detail"><strong>Şirkət:</strong> ' . htmlspecialchars($h['ctitle']) . '</div>';
+    if (!empty($h['price']) && $h['price'] != '0.00') echo '<div class="status-detail"><strong>Qiymət:</strong> ' . $h['price'] . '</div>';
+    if (!empty($h['agreePrice']) && $h['agreePrice'] != '0.00') echo '<div class="status-detail"><strong>Razılaşdığı:</strong> ' . $h['agreePrice'] . '</div>';
+    if (!empty($h['paycode'])) echo '<div class="status-detail"><strong>Ödəniş kodu:</strong> ' . htmlspecialchars($h['paycode']) . '</div>';
+    echo '</div>';
+}
+
+
+
                         if (!$hasHist) {
                             echo '<div class="empty-state"><i class="fa fa-history"></i>Status tapılmadı</div>';
                         }

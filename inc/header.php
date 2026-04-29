@@ -36,7 +36,55 @@
 </head>
 
 <body>
-
+<style>
+.app-sidebar-link { position: relative; }
+.app-sidebar-link::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%) scale(0.8);
+    background: #333;
+    color: #fff;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 9999;
+}
+.app-sidebar-link:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+.app-sidebar-link:not([data-tip])::after { display: none; }
+</style>
+<style>
+.modalShowStatus .modal-dialog { max-width: 580px; }
+.modalShowStatus .modal-content { border-radius: 12px; border: none; box-shadow: 0 8px 40px rgba(0,0,0,0.15);padding: 20px; overflow: hidden; }
+.modalShowStatus .modal-body { }
+.status-item { padding: 12px 16px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #4e73df; background: #f8f9fc; }
+.status-item .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.status-item .status-user { font-weight: 700; font-size: 14px; color: #333; }
+.status-item .status-date { font-size: 12px; color: #999; }
+.status-item .status-badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #fff; background: #4e73df; }
+.status-item .status-detail { font-size: 13px; color: #555; margin-top: 4px; }
+.status-item .status-detail strong { color: #333; }
+.status-item.success { border-left-color: #1cc88a; }
+.status-item.success .status-badge { background: #1cc88a; }
+.status-item.waiting { border-left-color: #f6c23e; }
+.status-item.waiting .status-badge { background: #f6c23e; color: #333; }
+.status-item.confirm { border-left-color: #36b9cc; }
+.status-item.confirm .status-badge { background: #36b9cc; }
+.status-item.paywait { border-left-color: #fd7e14; }
+.status-item.paywait .status-badge { background: #fd7e14; }
+.status-item.forward { border-left-color: #6f42c1; }
+.status-item.forward .status-badge { background: #6f42c1; }
+.status-item.payed { border-left-color: #e74a3b; }
+.status-item.payed .status-badge { background: #e74a3b; }
+</style>
 
   <div class="app-container">
 
@@ -77,7 +125,7 @@
     <div class="app-content">
 
       <div class="app-sidebar">
-        <a href="/" class="app-sidebar-link <? if ($_GET['action'] == '') {
+        <a href="/" data-tip="Ana səhifə" class="app-sidebar-link <? if ($_GET['action'] == '') {
                                               echo 'active';
                                             } ?>">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home">
@@ -85,27 +133,27 @@
             <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
         </a>
-        <a href="/call/current" class="app-sidebar-link <? if ($_GET['action'] == 'current') {
+        <a href="/call/current" data-tip="Cari müştərilər" class="app-sidebar-link <? if ($_GET['action'] == 'current') {
                                                           echo 'active';
                                                         } ?>">
           <i class="fa fa-handshake-o" aria-hidden="true"></i>
         </a>
-        <a href="/call/customers" class="app-sidebar-link <? if ($_GET['action'] == 'customers') {
+        <a href="/call/customers"  data-tip="Müştərilər" class="app-sidebar-link <? if ($_GET['action'] == 'customers') {
                                                             echo 'active';
                                                           } ?>">
           <i class="fa fa-user-o" aria-hidden="true"></i>
         </a>
-        <a href="/call/companies" class="app-sidebar-link <? if ($_GET['action'] == 'companies') {
+        <a href="/call/companies" data-tip="Şirkətlər" class="app-sidebar-link <? if ($_GET['action'] == 'companies') {
                                                             echo 'active';
                                                           } ?>">
           <i class="fa fa-building" aria-hidden="true"></i>
         </a>
-        <a href="/call/statuses" class="app-sidebar-link <? if ($_GET['action'] == 'statuses') {
+        <a href="/call/statuses" data-tip="Statuslar" class="app-sidebar-link <? if ($_GET['action'] == 'statuses') {
                                                             echo 'active';
                                                           } ?>">
           <i class="fa fa-check" aria-hidden="true"></i>
         </a>
-        <a href="/call/accounting" class="app-sidebar-link <? if ($_GET['action'] == 'accounting') {
+        <a href="/call/accounting" data-tip="Mühasibat" class="app-sidebar-link <? if ($_GET['action'] == 'accounting') {
                                                               echo 'active';
                                                             } ?>">
           <svg class="link-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="feather feather-pie-chart" viewBox="0 0 24 24">
@@ -114,21 +162,21 @@
           </svg>
         </a>
         <? if ($userGroup == 1 || $userGroup == 2 || $user_id == 14) { ?>
-          <a href="/call/orders" class="app-sidebar-link <? if ($_GET['action'] == 'orders') {
+          <a href="/call/orders" data-tip="Hesabatlar" class="app-sidebar-link <? if ($_GET['action'] == 'orders') {
                                                             echo 'active';
                                                           } ?><? if ($_GET['action'] == 'ordersconfirmed') {
                                                                                                                   echo 'active';
                                                                                                                 } ?>">
             <i class="fa fa-credit-card" aria-hidden="true"></i>
           </a>
-          <a href="/call/finance2" class="app-sidebar-link <? if ($_GET['action'] == 'finance2') {
+          <a href="/call/finance2" data-tip="Maliyyə" class="app-sidebar-link <? if ($_GET['action'] == 'finance2') {
                                                               echo 'active';
                                                             } ?>">
             <i class="fa fa-money" aria-hidden="true"></i>
           </a>
         <? } ?>
         <? if ($userGroup == 1 || $userGroup == 2) { ?>
-          <a href="/call/whatsapp" class="app-sidebar-link <? if ($_GET['action'] == 'whatsapp') {
+          <a href="/call/whatsapp"  data-tip="WhatsApp şablonları" class="app-sidebar-link <? if ($_GET['action'] == 'whatsapp') {
                                                               echo 'active';
                                                             } ?>">
             <i class="fa fa-whatsapp" aria-hidden="true" style="font-size:22px;"></i>
@@ -136,7 +184,7 @@
         <? } ?>
 
         <? if ($userGroup == 1 || $userGroup == 2) { ?>
-          <a href="/call/settings" class="app-sidebar-link <? if ($_GET['action'] == 'settings') {
+          <a href="/call/settings" data-tip="Parametrlər" class="app-sidebar-link <? if ($_GET['action'] == 'settings') {
                                                               echo 'active';
                                                             } ?>">
             <svg class="link-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="feather feather-settings" viewBox="0 0 24 24">
@@ -146,7 +194,7 @@
             </svg>
           </a>
         <? } ?>
-        <a href="/inc/logout.php" class="app-sidebar-link">
+        <a href="/inc/logout.php" data-tip="Çıxış" class="app-sidebar-link">
           <i class="fa fa-sign-out" aria-hidden="true"></i>
         </a>
       </div>

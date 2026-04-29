@@ -47,7 +47,6 @@ if (file_exists($jsonFile)) {
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="fw-bold mb-0"><i class="fa fa-whatsapp" style="color:#25D366;"></i> WhatsApp Şablonları</h4>
-        <a href="/call/settings" class="btn btn-light"><i class="fa fa-arrow-left"></i> Geri</a>
     </div>
 
     <?php if (!empty($saved)): ?>
