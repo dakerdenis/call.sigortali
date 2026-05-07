@@ -622,9 +622,10 @@
 
           <br>
 
-          <div class="form-group">
-            <label for="identification" class="col-form-label"><?= lang('Şəhadətnamə nömrəsi') ?>:</label>
-            <input type="text" name="identification" class="form-control" placeholder="<?= lang('Şəhadətnamə nömrəsi') ?>" id="identification">
+          <div class="form-group" style="position:relative;">
+            <label for="paymentIdentification" class="col-form-label"><?= lang('Şəhadətnamə nömrəsi') ?>:</label>
+            <input type="text" name="identification" class="form-control" placeholder="Axtarış..." id="paymentIdentification" autocomplete="off">
+            <div id="identificationDropdown" style="display:none; position:absolute; left:0; right:0; z-index:1050; background:#fff; border:1px solid #e0e0e0; border-top:none; border-radius:0 0 8px 8px; max-height:220px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
           </div>
 
           <div class="form-group">
@@ -808,9 +809,11 @@ $('#statusForm_add').on('submit', function(e) {
 
     }));
 
-    $('#form_add_payment').on('submit', (function(e) {
+$('#form_add_payment').on('submit', (function(e) {
 
       e.preventDefault();
+
+      var $btn = $(this).find('button[type="submit"]');
 
       $.ajax({
         type: 'POST',
@@ -820,22 +823,29 @@ $('#statusForm_add').on('submit', function(e) {
         cache: false,
         processData: false,
         beforeSend: function() {
-          $("#dynamic_content").html('<center><div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status"><span class="sr-only"></span></div></center>');
-          $('#addRow').prop('disabled', true);
-          $("#addRow").html('<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>');
+          $btn.prop('disabled', true);
+          $btn.html('<span class="spinner-grow spinner-grow-sm" role="status"></span>');
         },
         success: function(response) {
-          //console.log(response);
-          $('form#form_add').trigger("reset");
-          //loadAll();
-          $("#addRow").html('Yadda Saxla');
-          $('#addRow').prop('disabled', false);
-          $('.modalAddIncome').modal('toggle');
+          $('form#form_add_payment')[0].reset();
+          $btn.html('Yadda Saxla');
+          $btn.prop('disabled', false);
+          $('.modalAddPayment').modal('hide');
+          alert('Ödəniş uğurla əlavə edildi!');
+        },
+        error: function() {
+          $btn.html('Yadda Saxla');
+          $btn.prop('disabled', false);
+          alert('Xəta baş verdi! Yenidən cəhd edin.');
         }
       });
       return false;
 
     }));
+
+
+
+
 
     function load_data(page, query = '', limit = '') {
       $("#dynamic_content").css({
@@ -896,5 +906,61 @@ $('#statusForm_add').on('submit', function(e) {
 
 
 
+    });
+
+
+    // === Identification autocomplete ===
+    var identTimer = null;
+    $('#paymentIdentification').on('input', function() {
+        var val = $(this).val().trim();
+        clearTimeout(identTimer);
+        if (val.length < 2) {
+            $('#identificationDropdown').hide().empty();
+            return;
+        }
+        identTimer = setTimeout(function() {
+            $.ajax({
+                url: '/call/index.php?action=data&type=2',
+                method: 'POST',
+                data: { q: val },
+                dataType: 'json',
+                success: function(data) {
+                    var dd = $('#identificationDropdown');
+                    dd.empty();
+                    if (data.length === 0) {
+                        dd.append('<div style="padding:10px 14px; color:#94a3b8; font-size:13px;">Nəticə tapılmadı</div>');
+                    } else {
+                        $.each(data, function(i, item) {
+                            dd.append(
+                                '<div class="ident-option" style="padding:8px 14px; cursor:pointer; border-bottom:1px solid #f0f0f0; font-size:13px;" ' +
+                                'data-value="' + item.identification + '">' +
+                                '<strong>' + item.identification + '</strong>' +
+                                '<span style="color:#6c757d; margin-left:8px;">' + item.car_id + '</span>' +
+                                '<span style="color:#94a3b8; margin-left:8px; font-size:12px;">' + item.name + '</span>' +
+                                '</div>'
+                            );
+                        });
+                    }
+                    dd.show();
+                }
+            });
+        }, 300);
+    });
+
+    $(document).on('click', '.ident-option', function() {
+        $('#paymentIdentification').val($(this).data('value'));
+        $('#identificationDropdown').hide().empty();
+    });
+
+    $(document).on('mouseenter', '.ident-option', function() {
+        $(this).css('background', '#f8f9fc');
+    }).on('mouseleave', '.ident-option', function() {
+        $(this).css('background', '#fff');
+    });
+
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#paymentIdentification, #identificationDropdown').length) {
+            $('#identificationDropdown').hide();
+        }
     });
   </script>

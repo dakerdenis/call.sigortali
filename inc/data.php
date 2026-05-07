@@ -8,5 +8,22 @@ if(isset($_SESSION['login']) && isset($_SESSION['id'])){
         $data = json_encode($data);
         echo $data;
     }
+    if ($_GET['type'] == 2){ // search identification
+        $q = mysqli_real_escape_string($db, trim($_POST['q']));
+        if(strlen($q) >= 2) {
+            $sql = mysqli_query($db, "SELECT identification, car_id, name FROM customers WHERE identification LIKE '%$q%' ORDER BY identification ASC LIMIT 10");
+            $results = [];
+            while($row = mysqli_fetch_array($sql)) {
+                $results[] = [
+                    'identification' => $row['identification'],
+                    'car_id' => $row['car_id'],
+                    'name' => $row['name']
+                ];
+            }
+            echo json_encode($results);
+        } else {
+            echo '[]';
+        }
+    }
 }
 ?>

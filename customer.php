@@ -236,6 +236,11 @@
                 <i class="fa fa-history"></i> Statuslar tarixçəsi
             </button>
         </li>
+                <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-payments" type="button">
+                <i class="fa fa-money"></i> Ödənişlər
+            </button>
+        </li>
     </ul>
 
     <div class="tab-content">
@@ -411,6 +416,135 @@ while ($h = mysqli_fetch_array($sqlHist)) {
             </div>
         </div>
 
+        <!-- ===== Ödənişlər ===== -->
+        <div class="tab-pane fade" id="tab-payments">
+            <?php
+                $carIds = array_keys($cars);
+                $carIdsList = [];
+                foreach ($carIds as $cid) {
+                    $carIdsList[] = "'" . mysqli_real_escape_string($db, $cid) . "'";
+                }
+
+                // Также ищем по identification из полисов
+                $identList = [];
+                foreach ($allPolicies as $p) {
+                    if (!empty($p['identification'])) {
+                        $identList[] = "'" . mysqli_real_escape_string($db, $p['identification']) . "'";
+                    }
+                }
+
+                if (!empty($carIdsList)) {
+                    $inCars = implode(',', $carIdsList);
+                    $inIdent = !empty($identList) ? implode(',', $identList) : "'__none__'";
+
+                    // Суммы
+                    $sqlTotalPaid = mysqli_fetch_array(mysqli_query($db,
+                        "SELECT COALESCE(SUM(amount),0) as total FROM payments
+                         WHERE deletedby=0 AND (fromAccount IN ($inCars) OR orderId IN ($inIdent))"));
+
+                    $sqlTotalDebt = mysqli_fetch_array(mysqli_query($db,
+                        "SELECT COALESCE(SUM(amount),0) as total FROM payments
+                         WHERE deletedby=0 AND toAccount IN ($inCars)"));
+
+                    // Razılaşdığı qiymət (agreed price) — из последнего success статуса
+                    $sqlAgreed = mysqli_fetch_array(mysqli_query($db,
+                        "SELECT COALESCE(SUM(agreePrice),0) as total FROM call_status
+                         WHERE deletedby=0 AND car_id IN ($inCars)
+                         AND type IN (SELECT id FROM paramitems WHERE code='success')
+                         AND id IN (SELECT MAX(id) FROM call_status WHERE deletedby=0 AND car_id IN ($inCars) GROUP BY car_id)"));
+
+                    $totalPaid = (float)$sqlTotalPaid['total'];
+                    $totalWeSpent = (float)$sqlTotalDebt['total'];
+                    $totalAgreed = (float)$sqlAgreed['total'];
+                    $balance = $totalAgreed - $totalPaid;
+                    if ($balance < 0) $balance = 0;
+            ?>
+
+            <div class="row" style="margin-bottom:16px;">
+                <div class="col-md-4">
+                    <div class="info-card" style="border-left:4px solid #1cc88a;">
+                        <h6 style="color:#1cc88a;">Ödənilən məbləğ</h6>
+                        <div style="font-size:28px; font-weight:700; color:#1cc88a;">
+                            <?= number_format($totalPaid, 2) ?> ₼
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-card" style="border-left:4px solid #4e73df;">
+                        <h6 style="color:#4e73df;">Razılaşdığı qiymət</h6>
+                        <div style="font-size:28px; font-weight:700; color:#4e73df;">
+                            <?= number_format($totalAgreed, 2) ?> ₼
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-card" style="border-left:4px solid <?= $balance > 0 ? '#e74a3b' : '#1cc88a' ?>;">
+                        <h6 style="color:<?= $balance > 0 ? '#e74a3b' : '#1cc88a' ?>;">Qalıq borc</h6>
+                        <div style="font-size:28px; font-weight:700; color:<?= $balance > 0 ? '#e74a3b' : '#1cc88a' ?>;">
+                            <?= number_format($balance, 2) ?> ₼
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card" style="padding:0; overflow:hidden;">
+                <table class="table table-hover" style="margin:0; font-size:13px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th>Haradan</th>
+                            <th>Hara</th>
+                            <th>Şəhadətnamə</th>
+                            <th>Açıqlama</th>
+                            <th style="text-align:right;">Məbləğ</th>
+                            <th>Tarix</th>
+                            <th>Kateqoriya</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                        $sqlPayments = mysqli_query($db,
+                            "SELECT * FROM payments
+                             WHERE deletedby=0
+                             AND (fromAccount IN ($inCars) OR toAccount IN ($inCars) OR orderId IN ($inIdent))
+                             ORDER BY paydate DESC, id DESC
+                             LIMIT 100");
+
+                        $hasPayments = false;
+                        while ($pay = mysqli_fetch_array($sqlPayments)) {
+                            $hasPayments = true;
+                            $isIncoming = in_array($pay['toAccount'], $carIds);
+                            $amountColor = $isIncoming ? '#1cc88a' : '#e74a3b';
+                            $amountSign = $isIncoming ? '+' : '';
+                    ?>
+                        <tr>
+                            <td><span class="text-muted"><?= $pay['id'] ?></span></td>
+                            <td><?= htmlspecialchars($pay['fromAccount']) ?></td>
+                            <td><?= htmlspecialchars($pay['toAccount']) ?></td>
+                            <td style="font-family:monospace;"><?= htmlspecialchars($pay['orderId']) ?: '—' ?></td>
+                            <td><?= htmlspecialchars($pay['title']) ?: '—' ?></td>
+                            <td style="text-align:right; font-weight:700; color:<?= $amountColor ?>;">
+                                <?= $amountSign ?><?= number_format($pay['amount'], 2) ?> ₼
+                            </td>
+                            <td><?= safeDate($pay['paydate']) ?></td>
+                            <td><span class="text-muted"><?= htmlspecialchars($pay['category']) ?></span></td>
+                        </tr>
+                    <?php
+                        }
+                        if (!$hasPayments) {
+                            echo '<tr><td colspan="8" class="text-center text-muted" style="padding:30px;">Ödəniş tapılmadı</td></tr>';
+                        }
+                    ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <?php
+                } else {
+                    echo '<div class="info-card empty-state"><i class="fa fa-money"></i>Avtomobil olmadığı üçün ödəniş tapılmadı</div>';
+                }
+            ?>
+        </div>
     </div>
 </div>
 
