@@ -388,5 +388,34 @@ if (isset($_SESSION['login']) && isset($_SESSION['id'])) {
                 echo "1";
             }
         }
+    }else if ($_GET['type'] == 20) { // payments2 add
+        $category     = mysqli_real_escape_string($db, $_POST['category']);
+        $subcategory  = mysqli_real_escape_string($db, $_POST['subcategory']);
+        $subtype      = mysqli_real_escape_string($db, $_POST['subtype'] ?? '');
+        $insurance_type = ($subcategory === 'sigorta') ? mysqli_real_escape_string($db, $_POST['subtype'] ?? '') : '';
+        $payer_type   = mysqli_real_escape_string($db, $_POST['payer_type'] ?? '');
+        $from_account = mysqli_real_escape_string($db, $_POST['from_account'] ?? '');
+        $to_account   = mysqli_real_escape_string($db, $_POST['to_account'] ?? '');
+        $identification = mysqli_real_escape_string($db, $_POST['identification'] ?? '');
+        $car_id       = mysqli_real_escape_string($db, $_POST['car_id'] ?? '');
+        $amount       = floatval($_POST['amount']);
+        $effect       = intval($_POST['effect']);
+        $paydate      = mysqli_real_escape_string($db, $_POST['paydate']);
+        $note         = mysqli_real_escape_string($db, $_POST['note'] ?? '');
+
+        // For sigorta: insurance_type = subtype
+        if ($subcategory === 'sigorta') {
+            $insurance_type = $subtype;
+            $subtype = '';
+        }
+
+        $sql = "INSERT INTO payments2 (category, subcategory, insurance_type, payer_type, subtype, from_account, to_account, identification, car_id, amount, effect, paydate, note, createdby)
+                VALUES ('$category','$subcategory','$insurance_type','$payer_type','$subtype','$from_account','$to_account','$identification','$car_id','$amount','$effect','$paydate','$note','$user_id')";
+
+        if (mysqli_query($db, $sql)) {
+            echo '1';
+        } else {
+            echo mysqli_error($db);
+        } 
     }
 }

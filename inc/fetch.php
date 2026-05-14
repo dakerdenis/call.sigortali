@@ -10,10 +10,50 @@ if (isset($_SESSION['login']) && isset($_SESSION['id'])) {
   }
   $regexp = addslashes('[\\[\\]\\" ]');
   $break = 0;
-  //start dynamic
+//start dynamic
+
+  // === TYPE 20: payments2 — self-contained ===
+  if ($_GET['type'] == 20) {
+    $p2_limit = intval($_POST['limit'] ?: 25);
+    $p2_page = intval($_POST['page'] ?: 1);
+    $p2_start = ($p2_page - 1) * $p2_limit;
+
+    $where = "WHERE p.deletedby = 0";
+    if (!empty($_POST['category'])) { $where .= " AND category = '" . mysqli_real_escape_string($db, $_POST['category']) . "'"; }
+    if (!empty($_POST['subcategory'])) { $where .= " AND subcategory = '" . mysqli_real_escape_string($db, $_POST['subcategory']) . "'"; }
+    if (!empty($_POST['date_from'])) { $where .= " AND paydate >= '" . mysqli_real_escape_string($db, $_POST['date_from']) . "'"; }
+    if (!empty($_POST['date_to'])) { $where .= " AND paydate <= '" . mysqli_real_escape_string($db, $_POST['date_to']) . "'"; }
+
+$countR = mysqli_fetch_array(mysqli_query($db, "SELECT COUNT(*) as cnt FROM payments2 p $where"));
+    $total = (int)$countR['cnt'];
+    $rows = mysqli_query($db, "SELECT p.*, u.name AS uname, u.surname AS usurname FROM payments2 p LEFT JOIN users u ON u.id = p.createdby $where ORDER BY p.paydate DESC, p.id DESC LIMIT $p2_start, $p2_limit");
+
+    $catLabels = ['xercler'=>'Xərclər','dovriyye'=>'Dövriyyə'];
+    $subLabels = ['sigorta'=>'Sığorta','xerc'=>'Xərc','medaxil'=>'Mədaxil','mexaric'=>'Məxaric','transfer'=>'Transfer'];
+
+    echo '<table class="table table-hover table-sm mb-0" style="font-size:13px;"><thead class="table-light"><tr><th>#</th><th>Kateqoriya</th><th>Alt kat.</th><th>Növ</th><th>Hardan</th><th>Hara</th><th>Şəhadətnamə</th><th>DQN</th><th style="text-align:right;">Məbləğ</th><th>Tarix</th><th>Qeyd</th><th>İstifadəçi</th></tr></thead><tbody>';
+
+    while ($r = mysqli_fetch_array($rows)) {
+        $effColor = $r['effect'] == 1 ? '#1cc88a' : ($r['effect'] == -1 ? '#e74a3b' : '#6c757d');
+        $effSign = $r['effect'] == 1 ? '+' : ($r['effect'] == -1 ? '-' : '');
+        $typeLabel = $r['subcategory'] === 'sigorta' ? $r['insurance_type'] : $r['subtype'];
+        echo '<tr><td>'.$r['id'].'</td><td><span class="badge bg-'.($r['category']==='xercler'?'danger':'primary').'">'.($catLabels[$r['category']] ?? $r['category']).'</span></td><td>'.($subLabels[$r['subcategory']] ?? $r['subcategory']).'</td><td>'.htmlspecialchars($typeLabel).'</td><td>'.htmlspecialchars($r['from_account']).'</td><td>'.htmlspecialchars($r['to_account']).'</td><td style="font-family:monospace;">'.htmlspecialchars($r['identification']).'</td><td>'.htmlspecialchars($r['car_id']).'</td><td style="text-align:right;font-weight:700;color:'.$effColor.';">'.$effSign.number_format($r['amount'],2).' ₼</td><td>'.date("d.m.Y", strtotime($r['paydate'])).'</td><td title="'.htmlspecialchars($r['note']).'">'.mb_substr($r['note'],0,30).'</td><td>'.htmlspecialchars(trim(($r['uname']??'').' '.($r['usurname']??''))).'</td></tr>';
+    }
+    if ($total == 0) echo '<tr><td colspan="12" class="text-center text-muted py-4">Ödəniş tapılmadı</td></tr>';
+    echo '</tbody></table>';
+    if ($total > $p2_limit) {
+        $totalPages = ceil($total / $p2_limit);
+        echo '<div class="d-flex justify-content-between align-items-center p-3"><small class="text-muted">'.$total.' nəticə</small><ul class="pagination pagination-sm mb-0">';
+        for ($i = 1; $i <= $totalPages; $i++) echo '<li class="page-item'.($i==$p2_page?' active':'').'"><a class="page-link" href="javascript:void(0)" data-page_number="'.$i.'">'.$i.'</a></li>';
+        echo '</ul></div>';
+    }
+    exit;
+  }
+  // === END TYPE 20 ===
+
 ?>
 <?php
-  if ($_GET['type'] == 1) { // customers grid
+  if ($_GET['type'] == 1) { // customers grid // customers grid
     $getSettings_startCustomer = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM settings WHERE setting_name = 'startCustomer'"));
     $getSettings_limitCustomer = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM settings WHERE setting_name = 'limitCustomer'"));
     $getSettings_minprice = mysqli_fetch_array(mysqli_query($db, "SELECT * FROM settings WHERE setting_name = 'minprice'"));
@@ -540,16 +580,12 @@ AND toAccount='Özü ödədi'
     // Сортировка по дате (write_date)
     $sortDir = (isset($_POST['sort']) && $_POST['sort'] === 'asc') ? 'ASC' : 'DESC';
     $query .= " ORDER BY write_date $sortDir, id $sortDir";
-  }
+  } 
 ?>
 <?php
   $filter_query = $query . ' LIMIT ' . $start . ', ' . $limit . '';
-
-  // Быстрый подсчёт через COUNT(*) вместо тащить все строки
   $count_query = preg_replace('/^SELECT\s+.*?\s+FROM/is', 'SELECT COUNT(*) as cnt FROM', $query, 1);
-  // Убираем ORDER BY из COUNT-запроса — он не нужен и замедляет
   $count_query = preg_replace('/\s+ORDER\s+BY\s+.*$/is', '', $count_query);
-
   $statement = $connect->prepare($count_query);
   $statement->execute();
   $countRow = $statement->fetch(PDO::FETCH_ASSOC);
@@ -561,7 +597,6 @@ AND toAccount='Özü ödədi'
   $total_filter_data = count($result);
   $fetchMethod = 'DB FETCH OTHER';
 ?>
-
 <?php
   $output = '<table id="dynamic_content" class="table table-hover">';
   if ($_GET['type'] == 1) { // customers grid
@@ -1674,16 +1709,11 @@ $output .= '
 
       $output .= '</tr>';
     }
-  }
-
+  } 
 ?>
-
 <?php
-
-  //end dynamic
   $total_data = $total_data - $break;
   $all_total = $all_total - $break;
-
   if ($total_data == 0 && $_GET['type'] != 54) {
     $output .= '
   <style>.totalTable{display: none;}</style>
@@ -1786,11 +1816,9 @@ $output .= '
         }
       }
     }
-
     $output .= $previous_link . $page_link . $next_link;
     $output .= '
       </ul>
-
     </div>
     </div>
     ';
@@ -1800,10 +1828,9 @@ $output .= '
   } else {
     echo $output;
   }
-
   if ($user_id == 1) {
     echo $query . ' - ' . $fetchMethod;
   }
-}
 
+}
 ?>
